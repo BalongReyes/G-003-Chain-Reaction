@@ -44,4 +44,12 @@ public abstract class AbstractMap{
         return moveable;
     }
     
+// -----------------------------------------------------------------------------------------------------------
+    
+    public int[][] duplicatorCells;
+
+    public int[][] getDuplicatorCells(){
+        return duplicatorCells;
+    }
+    
 }

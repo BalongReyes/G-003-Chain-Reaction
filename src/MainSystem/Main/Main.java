@@ -6,6 +6,7 @@ import DataSystem.Maps.AbstractMap;
 import DataSystem.Maps.*;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
+import MainSystem.Object.CellType.CellDuplicator;
 import MainSystem.Object.CellType.CellTeleport;
 import MainSystem.Object.CellType.CellMoveable;
 import MainSystem.Object.CellType.CellNoEntry;
@@ -69,7 +70,7 @@ public class Main{
 // Constructor's Methods =====================================================================================
 
     private void setWindow(){
-        window = new Window(canvasSize, 3);
+        window = new Window(canvasSize, 1);
     }
     
 // -----------------------------------------------------------------------------------------------------------
@@ -219,12 +220,14 @@ public class Main{
         int[][] mapMirrorData = null;
         int[][] mapNoEntryData = null;
         int[][] mapMoveable = null;
+        int[][] mapDuplicator = null;
         
         if(this.map != null){
             mapData = map.getMap();
             mapMirrorData = map.getTeleportCells();
             mapNoEntryData = map.getNoEntryCells();
             mapMoveable = map.getMoveable();
+            mapDuplicator = map.getDuplicatorCells();
             if(mapData != null){
                 for(int x = 0; x < SettingsCell.xCell; x++){
                     for(int y = 0; y < SettingsCell.yCell; y++){
@@ -233,6 +236,7 @@ public class Main{
                         int mapBitMirror = -1;
                         int mapBitNoEntry = -1;
                         int mapBitMoveable = -1;
+                        int mapBitDuplicator = -1;
                         
                         if(mapMirrorData != null){
                             mapBitMirror = mapMirrorData[y][x];
@@ -242,6 +246,9 @@ public class Main{
                         }
                         if(mapMoveable != null){
                             mapBitMoveable = mapMoveable[y][x];
+                        }
+                        if(mapDuplicator != null){
+                            mapBitDuplicator = mapDuplicator[y][x];
                         }
                         
                         TypeCellPart typeCell = TypeCellPart.getTypeCellPart(mapBit);
@@ -257,6 +264,9 @@ public class Main{
                             }
                             case moveable -> {
                                 ((CellMoveable)c).setMoveable(mapBitMoveable);
+                            }
+                            case duplicator -> {
+                                ((CellDuplicator)c).setDuplicator(mapBitDuplicator);
                             }
                         }
                         

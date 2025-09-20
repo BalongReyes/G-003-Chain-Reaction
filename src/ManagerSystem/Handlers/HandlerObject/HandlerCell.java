@@ -6,6 +6,7 @@ import DataSystem.Type.TypeCellPart;
 import MainSystem.Abstract.AbstractObject;
 import MainSystem.Main.Main;
 import MainSystem.Object.Cell;
+import MainSystem.Object.CellType.CellDuplicator;
 import MainSystem.Object.CellType.CellTeleport;
 import MainSystem.Object.CellType.CellNoEntry;
 import MainSystem.Object.CellType.CellSidePortal;
@@ -88,6 +89,26 @@ public class HandlerCell{
         for(Cell c : getArray()){
             if(c instanceof CellTeleport cm){
                 if(cm.isTeleportPart(teleportCellPart)){
+                    output[i] = c;
+                    i++;
+                }
+            }
+            if(i == 2) break;
+        }
+        
+        if(output[0] == null || output[1] == null){
+            return null;
+        }else{
+            return output;
+        }
+    }
+    
+    public static Cell[] getCellDuplicator(int duplicatorCellPart){
+        Cell[] output = new Cell[]{null, null};
+        int i = 0;
+        for(Cell c : getArray()){
+            if(c instanceof CellDuplicator cm){
+                if(cm.isDuplicatorPart(duplicatorCellPart)){
                     output[i] = c;
                     i++;
                 }

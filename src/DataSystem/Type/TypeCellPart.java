@@ -1,6 +1,7 @@
 package DataSystem.Type;
 
 import MainSystem.Object.Cell;
+import MainSystem.Object.CellType.CellDuplicator;
 import MainSystem.Object.CellType.CellTeleport;
 import MainSystem.Object.CellType.CellMoveable;
 import MainSystem.Object.CellType.CellNoEntry;
@@ -23,7 +24,8 @@ public enum TypeCellPart{
     teleport(),         // 6
     noEntry(),          // 7
     moveable(),         // 8
-    territory();        // 9
+    territory(),        // 9
+    duplicator();       // 10
 
 // ===========================================================================================================
     
@@ -65,6 +67,9 @@ public enum TypeCellPart{
             }
             case territory -> {
                 return new CellTerritory(x, y, rx, ry);
+            }
+            case duplicator -> {
+                return new CellDuplicator(x, y, rx, ry);
             }
         }
         return null;
