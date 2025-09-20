@@ -13,6 +13,7 @@ import MainSystem.Object.CellType.CellSidePortal;
 import MainSystem.Object.CellType.CellSpecialPortal;
 import Settings.SettingsCell;
 import java.util.ArrayList;
+import java.util.List;
 
 public class HandlerCell{
 
@@ -103,24 +104,16 @@ public class HandlerCell{
         }
     }
     
-    public static Cell[] getCellDuplicator(int duplicatorCellPart){
-        Cell[] output = new Cell[]{null, null};
-        int i = 0;
-        for(Cell c : getArray()){
-            if(c instanceof CellDuplicator cm){
-                if(cm.isDuplicatorPart(duplicatorCellPart)){
-                    output[i] = c;
-                    i++;
+    public static List<Cell> getCellDuplicator(int duplicatorCellPart) {
+        List<Cell> output = new ArrayList<>();
+        for (Cell c : getArray()) {
+            if (c instanceof CellDuplicator cm) {
+                if (cm.isDuplicatorPart(duplicatorCellPart)) {
+                    output.add(c);
                 }
             }
-            if(i == 2) break;
         }
-        
-        if(output[0] == null || output[1] == null){
-            return null;
-        }else{
-            return output;
-        }
+        return output;
     }
     
 // -----------------------------------------------------------------------------------------------------------
@@ -315,9 +308,8 @@ public class HandlerCell{
             sC.updateMaxAtoms();
             if(sC instanceof CellTeleport cm){
                 cm.updateTeleport();
-            }
-            if(sC instanceof CellDuplicator cm){
-                cm.updateDuplicator();
+            } else if (sC instanceof CellDuplicator cd) {
+                cd.updateDuplicator();
             }
         }
         

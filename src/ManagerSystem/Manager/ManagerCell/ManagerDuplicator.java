@@ -1,34 +1,34 @@
 package ManagerSystem.Manager.ManagerCell;
 
 import MainSystem.Object.Cell;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ManagerDuplicator{
+public class ManagerDuplicator {
 
     private Cell parent;
     private int duplicateCellPart;
+    private List<Cell> duplicatorCells = new ArrayList<>();
 
-    public ManagerDuplicator(Cell parent){
+    public ManagerDuplicator(Cell parent) {
         this.parent = parent;
     }
 
-    public void setDuplicateCellPart(int duplicateCellPart){
+    public void setDuplicateCellPart(int duplicateCellPart) {
         this.duplicateCellPart = duplicateCellPart;
     }
 
-    public int getDuplicatorCellPart(){
+    public int getDuplicatorCellPart() {
         return duplicateCellPart;
     }
-    
-// ===========================================================================================================
-    
-    private Cell duplicatorCell;
 
-    public void setDuplicatorCell(Cell duplicatorCell){
-        this.duplicatorCell = duplicatorCell;
+    public void addDuplicatorCell(Cell duplicatorCell) {
+        if (!this.duplicatorCells.contains(duplicatorCell)) {
+            this.duplicatorCells.add(duplicatorCell);
+        }
     }
 
-    public Cell getDuplicatorCell(){
-        return duplicatorCell;
+    public List<Cell> getDuplicatorCells() {
+        return duplicatorCells;
     }
-    
 }

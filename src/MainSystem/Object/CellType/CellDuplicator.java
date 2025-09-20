@@ -5,6 +5,7 @@ import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Manager.ManagerCell.ManagerDuplicator;
+import java.util.List;
 
 public class CellDuplicator extends Cell {
 
@@ -30,11 +31,11 @@ public class CellDuplicator extends Cell {
     }
 
     public void updateDuplicator() {
-        Cell[] duplicators = HandlerCell.getCellDuplicator(getManagerDuplicator().getDuplicatorCellPart());
+        List<Cell> duplicators = HandlerCell.getCellDuplicator(getManagerDuplicator().getDuplicatorCellPart());
         if (duplicators != null) {
             for (Cell c : duplicators) {
                 if (c != this) {
-                    getManagerDuplicator().setDuplicatorCell(c);
+                    getManagerDuplicator().addDuplicatorCell(c);
                 }
             }
         }
@@ -49,11 +50,12 @@ public class CellDuplicator extends Cell {
 
         isSyncing = true;
         super.confirmAddAtoms(player, explodeAdd);
-        Cell duplicatorCell = getManagerDuplicator().getDuplicatorCell();
-        if (duplicatorCell != null) {
-            ((CellDuplicator) duplicatorCell).isSyncing = true;
-            duplicatorCell.confirmAddAtoms(player, explodeAdd);
-            ((CellDuplicator) duplicatorCell).isSyncing = false;
+        for (Cell duplicatorCell : getManagerDuplicator().getDuplicatorCells()) {
+            if (duplicatorCell != null) {
+                ((CellDuplicator) duplicatorCell).isSyncing = true;
+                duplicatorCell.confirmAddAtoms(player, explodeAdd);
+                ((CellDuplicator) duplicatorCell).isSyncing = false;
+            }
         }
         isSyncing = false;
     }
@@ -64,9 +66,10 @@ public class CellDuplicator extends Cell {
             return;
         }
         super.setPop(popPlayer);
-        Cell duplicatorCell = getManagerDuplicator().getDuplicatorCell();
-        if (duplicatorCell != null) {
-            duplicatorCell.setPop(popPlayer);
+        for (Cell duplicatorCell : getManagerDuplicator().getDuplicatorCells()) {
+            if (duplicatorCell != null) {
+                duplicatorCell.setPop(popPlayer);
+            }
         }
     }
 }
