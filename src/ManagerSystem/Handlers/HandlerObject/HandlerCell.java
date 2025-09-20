@@ -316,6 +316,9 @@ public class HandlerCell{
             if(sC instanceof CellTeleport cm){
                 cm.updateTeleport();
             }
+            if(sC instanceof CellDuplicator cm){
+                cm.updateDuplicator();
+            }
         }
         
         resetFocused();

@@ -1,5 +1,6 @@
 package MainSystem.Object.CellType;
 
+import DataSystem.Data.Player;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
@@ -8,6 +9,7 @@ import ManagerSystem.Manager.ManagerCell.ManagerDuplicator;
 public class CellDuplicator extends Cell {
 
     public ManagerDuplicator managerDuplicator;
+    private boolean isSyncing = false;
 
     public CellDuplicator(double x, double y, int rx, int ry) {
         super(x, y, rx, ry);
@@ -15,23 +17,56 @@ public class CellDuplicator extends Cell {
         managerDuplicator = new ManagerDuplicator(this);
     }
 
-    public ManagerDuplicator getManagerDuplicator(){
+    public ManagerDuplicator getManagerDuplicator() {
         return managerDuplicator;
     }
-    
-    public void setDuplicator(int duplicatorCellPart){
+
+    public void setDuplicator(int duplicatorCellPart) {
         managerDuplicator.setDuplicateCellPart(duplicatorCellPart);
     }
-    
-    public boolean isDuplicatorPart(int duplicatorCellPart){
+
+    public boolean isDuplicatorPart(int duplicatorCellPart) {
         return getManagerDuplicator().getDuplicatorCellPart() == duplicatorCellPart;
     }
-    
-    public void updateTeleport(){
-        Cell[] teleports = HandlerCell.getCellDuplicator(getManagerDuplicator().getDuplicatorCellPart());
-        if(teleports != null) for(Cell c : teleports) if(c != this){
-            getManagerDuplicator().setDuplicatorCell(c);
+
+    public void updateDuplicator() {
+        Cell[] duplicators = HandlerCell.getCellDuplicator(getManagerDuplicator().getDuplicatorCellPart());
+        if (duplicators != null) {
+            for (Cell c : duplicators) {
+                if (c != this) {
+                    getManagerDuplicator().setDuplicatorCell(c);
+                }
+            }
         }
     }
-    
+
+    @Override
+    public void confirmAddAtoms(Player player, boolean explodeAdd) {
+        if (isSyncing) {
+            super.confirmAddAtoms(player, explodeAdd);
+            return;
+        }
+
+        isSyncing = true;
+        super.confirmAddAtoms(player, explodeAdd);
+        Cell duplicatorCell = getManagerDuplicator().getDuplicatorCell();
+        if (duplicatorCell != null) {
+            ((CellDuplicator) duplicatorCell).isSyncing = true;
+            duplicatorCell.confirmAddAtoms(player, explodeAdd);
+            ((CellDuplicator) duplicatorCell).isSyncing = false;
+        }
+        isSyncing = false;
+    }
+
+    @Override
+    public void setPop(Player popPlayer) {
+        if (this.pop) {
+            return;
+        }
+        super.setPop(popPlayer);
+        Cell duplicatorCell = getManagerDuplicator().getDuplicatorCell();
+        if (duplicatorCell != null) {
+            duplicatorCell.setPop(popPlayer);
+        }
+    }
 }
