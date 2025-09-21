@@ -37,7 +37,7 @@ public class Main{
     public int totalSize;
     public Dimension canvasSize;
     
-    public AbstractMap map = new Map14();
+    public AbstractMap map = new Map1();
     
 // Constructor ===============================================================================================
     

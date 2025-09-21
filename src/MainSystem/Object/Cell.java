@@ -82,13 +82,12 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 getManagerAtoms().add(player);
             }
             case 2 -> {
-                Player[] differentAtoms = getManagerAtoms().getDifferentAtoms();
-                switch(differentAtoms.length){
+                switch(getManagerAtoms().atomsSize()){
                     case 0 -> {
                         getManagerAtoms().add(player);
                     }
                     case 1 -> {
-                        if(!getManagerAtoms().checkAtoms(player) && explodeAdd){
+                        if(explodeAdd && !getManagerAtoms().checkAtoms(player)){
                             getManagerAtoms().replaceAllThenAdd(Player.Dead);
                         }else{
                             getManagerAtoms().add(player);
@@ -97,27 +96,17 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 }
             }
             case 3 -> {
-                switch(getManagerAtoms().differentAtomsSize()){
-                    case 0 -> {
+                switch(getManagerAtoms().atomsSize()){
+                    case 0, 1 -> {
                         getManagerAtoms().add(player);
-                    }
-                    case 1 -> {
-                        switch(getManagerAtoms().atomsSize()){
-                            case 0, 1 -> {
-                                getManagerAtoms().add(player);
-                            }
-                            case 2 -> {
-                                if(explodeAdd && !getManagerAtoms().checkAtoms(player)){
-                                    getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                                }else{
-                                    getManagerAtoms().add(player);
-                                }
-                            }
-                        }
                     }
                     case 2 -> {
                         if(explodeAdd){
-                            getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                            if(getManagerAtoms().checkAtoms(player)){
+                                getManagerAtoms().add(player);
+                            }else{
+                                getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                            }
                         }else{
                             if(getManagerAtoms().checkAtoms(player)){
                                 getManagerAtoms().replaceAllThenAdd(player);
@@ -127,39 +116,20 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 }
             }
             case 4 -> {
-                switch(getManagerAtoms().differentAtomsSize()){
-                    case 0 -> {
+                switch(getManagerAtoms().atomsSize()){
+                    case 0, 1, 2 -> {
                         getManagerAtoms().add(player);
                     }
-                    case 1 -> {
-                        switch(getManagerAtoms().atomsSize()){
-                            case 0, 1, 2 -> {
+                    case 3 -> {
+                        if(explodeAdd){
+                            if(getManagerAtoms().checkAtoms(player)){
                                 getManagerAtoms().add(player);
+                            }else{
+                                getManagerAtoms().replaceAllThenAdd(Player.Dead);
                             }
-                            case 3 -> {
-                                if(explodeAdd && !getManagerAtoms().checkAtoms(player)){
-                                    getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                                }else{
-                                    if(getManagerAtoms().checkAtoms(player)){
-                                        getManagerAtoms().replaceAllThenAdd(player);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    case 2, 3 -> {
-                        switch(getManagerAtoms().atomsSize()){
-                            case 0, 1, 2 -> {
-                                getManagerAtoms().add(player);
-                            }
-                            case 3 -> {
-                                if(explodeAdd){
-                                    getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                                }else{
-                                    if(getManagerAtoms().checkAtoms(player)){
-                                        getManagerAtoms().replaceAllThenAdd(player);
-                                    }
-                                }
+                        }else{
+                            if(getManagerAtoms().checkAtoms(player)){
+                                getManagerAtoms().replaceAllThenAdd(player);
                             }
                         }
                     }
