@@ -30,7 +30,9 @@ public class Rule {
         VALID,
         INVALID,
         DEFAULT,
-        TERRITORY_VALIDATE
+        TERRITORIAL_VALIDATE,
+        SAME_PLAYER_VALIDATE,
+        DIFFERENT_PLAYER_VALIDATE,
     }
     
     public enum Trigger {
@@ -70,44 +72,56 @@ public class Rule {
 
     public void execute(Cell cell, Player player, boolean explodeAdd) {
         switch (action) {
-            case ADD -> {
+            case ADD:
                 cell.getManagerAtoms().add(player);
-            }
-            case REPLACE -> {
+                break;
+            case REPLACE:
                 cell.getManagerAtoms().replaceAllThenAdd(player);
-            }
-            case REPLACE_WITH_DEAD -> {
+                break;
+            case REPLACE_WITH_DEAD:
                 cell.getManagerAtoms().replaceAllThenAdd(Player.Dead);
-            }
-            case TERRITORIAL_ACTION -> {
+                break;
+            case TERRITORIAL_ACTION:
                 if (cell instanceof CellTerritory territoryCell) {
                     if (territoryCell.getManagerTerritory().territoryNotOwned()) {
                         territoryCell.getManagerTerritory().setTerritory(player);
                         if (!explodeAdd && !territoryCell.getManagerAtoms().checkAtoms(Player.Dead)) return;
                     } else if (territoryCell.getManagerTerritory().territoryCheckOwner(player)) {
-                        // If the player already owns the territory, just add the atom
                         cell.getManagerAtoms().add(player);
                     } else {
                         if (explodeAdd) {
                             territoryCell.getManagerTerritory().incrementTerritoryDestroy();
                             if (territoryCell.getManagerTerritory().getTerritoryDestroy() >= SettingsCell.maxTerritoryHeath) {
                                 territoryCell.getManagerTerritory().reset();
+                            } else {
+                                territoryCell.getManagerAtoms().reset();
                             }
                         }
                     }
                 }
-            }
-            case POP -> {
+                break;
+            case POP:
                 cell.setPop(player);
-            }
+                break;
         }
     }
 
-    public Validation validate(Cell cell, Player player) {
-        if (validation == Validation.TERRITORY_VALIDATE) {
-            if (cell instanceof CellTerritory cellTerritory) {
-                return cellTerritory.territoryValidate(player) ? Validation.VALID : Validation.INVALID;
-            }
+    public Validation validate(Cell cell, Player player, boolean explodeAdd) {
+        switch (validation) {
+            case TERRITORIAL_VALIDATE:
+                if (cell instanceof CellTerritory cellTerritory) {
+                    boolean isOwnerOrUnowned = cellTerritory.territoryValidate(player);
+                    if (isOwnerOrUnowned) {
+                        return Validation.VALID;
+                    }
+                    // If owned by another player
+                    return explodeAdd ? Validation.VALID : Validation.INVALID;
+                }
+                break;
+            case SAME_PLAYER_VALIDATE:
+                return cell.getManagerAtoms().checkAtoms(player) ? Validation.VALID : Validation.INVALID;
+            case DIFFERENT_PLAYER_VALIDATE:
+                return !cell.getManagerAtoms().checkAtoms(player) ? Validation.VALID : Validation.INVALID;
         }
         return validation;
     }
@@ -115,5 +129,5 @@ public class Rule {
     public Action getAction(){
         return action;
     }
-    
+
 }

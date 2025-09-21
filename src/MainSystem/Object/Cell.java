@@ -1,3 +1,4 @@
+// src/MainSystem/Object/Cell.java
 
 package MainSystem.Object;
 
@@ -5,6 +6,7 @@ import DataSystem.Data.Player;
 import DataSystem.Data.Position;
 import DataSystem.ID.IDDirection;
 import DataSystem.State.StateCell;
+import DataSystem.State.StateTerritory;
 import DataSystem.ID.IDObject;
 import DataSystem.Interface.Clickable;
 import DataSystem.Interface.Renderable;
@@ -200,16 +202,24 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     protected Position lastPosition = null;
     
-    public void saveState(){
-        this.stateCellStack.add(new StateCell(getManagerAtoms().getArray(), getPosition()));
+    public void saveState(StateTerritory territoryState){
+        this.stateCellStack.add(new StateCell(getManagerAtoms().getArray(), getPosition(), territoryState));
         if(this.stateCellStack.size() > main.undoLimit){
             this.stateCellStack.remove(0);
         }
     }
 
+    public void saveState(){
+        saveState(null);
+    }
+
     public void undoState(){
         if(stateCellStack.empty()) return;
         StateCell sC = (StateCell) this.stateCellStack.pop();
+        restoreStateFrom(sC);
+    }
+
+    protected void restoreStateFrom(StateCell sC) {
         this.getManagerAtoms().setStateCell(sC);
         if(isCellPart(TypeCellPart.moveable)){
             ((CellMoveable)this).undoStateMove(sC);

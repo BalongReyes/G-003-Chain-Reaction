@@ -1,3 +1,5 @@
+// src/ManagerSystem/Manager/ManagerCell/ManagerTerritory.java
+
 package ManagerSystem.Manager.ManagerCell;
 
 import DataSystem.Data.Player;
@@ -102,6 +104,6 @@ public class ManagerTerritory{
     public void setStateCell(StateTerritory sC){
         setTerritory(sC.getTerritory());
         setTerritoryDecay(sC.getTerritoryDecay());
-        setTerritoryDecay(sC.getTerritoryDestroy());
+        setTerritoryDestroy(sC.getTerritoryDestroy());
     }
 }

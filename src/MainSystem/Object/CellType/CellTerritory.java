@@ -1,7 +1,9 @@
+// src/MainSystem/Object/CellType/CellTerritory.java
 
 package MainSystem.Object.CellType;
 
 import DataSystem.Data.Player;
+import DataSystem.State.StateCell;
 import DataSystem.State.StateTerritory;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
@@ -10,7 +12,6 @@ import ManagerSystem.Manager.ManagerCell.ManagerTerritory;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.Stack;
 
 public class CellTerritory extends Cell{
 
@@ -167,29 +168,22 @@ public class CellTerritory extends Cell{
 
 // State =====================================================================================================
     
-    public Stack<StateTerritory> stateCellStack = new Stack<>();
-    
-    @Override
-    public void resetState(){
-        super.resetState();
-        stateCellStack.clear();
-    }
-    
     @Override
     public void saveState(){
-        super.saveState();
-        this.stateCellStack.add(new StateTerritory(getManagerTerritory()));
-        if(this.stateCellStack.size() > main.undoLimit){
-            this.stateCellStack.remove(0);
-        }
+        saveState(new StateTerritory(getManagerTerritory()));
     }
 
     @Override
     public void undoState(){
-        super.undoState();
-        if(stateCellStack.empty()) return;
-        StateTerritory sC = (StateTerritory) this.stateCellStack.pop();
-        this.getManagerTerritory().setStateCell(sC);
+        if (stateCellStack.empty()) return;
+        
+        StateCell sC = (StateCell) stateCellStack.pop();
+        
+        if (sC.getStateTerritory() != null) {
+            this.getManagerTerritory().setStateCell(sC.getStateTerritory());
+        }
+        
+        restoreStateFrom(sC);
     }
     
 }

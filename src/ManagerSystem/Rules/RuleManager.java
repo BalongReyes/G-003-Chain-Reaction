@@ -1,8 +1,11 @@
+// src/ManagerSystem/Rules/RuleManager.java
+
 package ManagerSystem.Rules;
 
 import DataSystem.Data.Player;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
+import MainSystem.Object.CellType.CellTerritory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,11 +15,17 @@ public class RuleManager {
 
     static {
         // Rules for cells with maxAtoms = 2
-        rules.add(new Rule(null, 2, 1, 1, Rule.Action.REPLACE_WITH_DEAD, Rule.Validation.VALID, Rule.Trigger.ANY));
+        rules.add(new Rule(null, 2, 1, 1, Rule.Action.ADD, Rule.Validation.VALID, Rule.Trigger.CLICK));
+        rules.add(new Rule(null, 2, 1, 1, Rule.Action.ADD, Rule.Validation.SAME_PLAYER_VALIDATE, Rule.Trigger.EXPLOSION));
+        rules.add(new Rule(null, 2, 1, 1, Rule.Action.REPLACE_WITH_DEAD, Rule.Validation.DIFFERENT_PLAYER_VALIDATE, Rule.Trigger.EXPLOSION));
 
         // Rules for cells with maxAtoms = 3
         rules.add(new Rule(null, 3, 2, 1, Rule.Action.ADD, Rule.Validation.VALID, Rule.Trigger.ANY));
-        rules.add(new Rule(null, 3, 2, 2, Rule.Action.REPLACE_WITH_DEAD, Rule.Validation.VALID, Rule.Trigger.ANY));
+        rules.add(new Rule(null, 3, 2, 2, Rule.Action.REPLACE, Rule.Validation.SAME_PLAYER_VALIDATE, Rule.Trigger.CLICK));
+        rules.add(new Rule(null, 3, 2, 2, Rule.Action.ADD, Rule.Validation.DIFFERENT_PLAYER_VALIDATE, Rule.Trigger.CLICK));
+        rules.add(new Rule(null, 3, 2, 2, Rule.Action.ADD, Rule.Validation.SAME_PLAYER_VALIDATE, Rule.Trigger.EXPLOSION));
+        rules.add(new Rule(null, 3, 2, 2, Rule.Action.REPLACE_WITH_DEAD, Rule.Validation.DIFFERENT_PLAYER_VALIDATE, Rule.Trigger.EXPLOSION));
+
 
         // Rules for cells with maxAtoms = 4
         rules.add(new Rule(null, 4, 3, 1, Rule.Action.ADD, Rule.Validation.VALID, Rule.Trigger.ANY));
@@ -24,7 +33,7 @@ public class RuleManager {
         rules.add(new Rule(null, 4, 3, 3, Rule.Action.REPLACE_WITH_DEAD, Rule.Validation.VALID, Rule.Trigger.ANY));
 
         // Rule for territory cells
-        rules.add(new Rule(TypeCellPart.territory, 0, 0, 0, Rule.Action.TERRITORIAL_ACTION, Rule.Validation.TERRITORY_VALIDATE, Rule.Trigger.ANY));
+        rules.add(new Rule(TypeCellPart.territory, 0, 0, 0, Rule.Action.TERRITORIAL_ACTION, Rule.Validation.TERRITORIAL_VALIDATE, Rule.Trigger.ANY));
         
         // Rule for popping cells
         rules.add(new Rule(null, 0, 0, 0, Rule.Action.POP, Rule.Validation.DEFAULT, Rule.Trigger.ANY));
@@ -38,8 +47,10 @@ public class RuleManager {
 
         for (Rule rule : rules) {
             if (rule.check(cell, explodeAdd)) {
-                rule.execute(cell, player, explodeAdd);
-                return;
+                if (rule.validate(cell, player, explodeAdd) == Rule.Validation.VALID) {
+                    rule.execute(cell, player, explodeAdd);
+                    return;
+                }
             }
         }
 
@@ -48,20 +59,22 @@ public class RuleManager {
     }
 
     public static boolean isValid(Cell cell, Player player) {
+        if (cell instanceof CellTerritory territoryCell) {
+            if (territoryCell.getManagerTerritory().territoryOwned() && !territoryCell.getManagerTerritory().territoryCheckOwner(player)) {
+                return false;
+            }
+        }
+        
         for (Rule rule : rules) {
-            if (rule.check(cell, false)) { // Corrected this line
-                switch (rule.validate(cell, player)) {
-                    case VALID -> {
-                        return true;
-                    }
-                    case INVALID -> {
-                        return false;
-                    }
-                    case DEFAULT -> {
-                    }
+            if (rule.check(cell, false)) {
+                Rule.Validation result = rule.validate(cell, player, false);
+                if (result == Rule.Validation.VALID) {
+                    return true;
                 }
-                // Continue to the next rule or default logic
-                            }
+                if (result == Rule.Validation.INVALID) {
+                    return false;
+                }
+            }
         }
 
         // Default validation logic if no specific rule matches

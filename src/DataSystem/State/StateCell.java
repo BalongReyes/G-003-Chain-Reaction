@@ -1,3 +1,4 @@
+// src/DataSystem/State/StateCell.java
 
 package DataSystem.State;
 
@@ -8,10 +9,12 @@ public class StateCell{
 
     public Player[] dataPlayerArray;
     public Position lastPosition;
+    public StateTerritory stateTerritory;
     
-    public StateCell(Player[] dataPlayerArray, Position lastPosition){
+    public StateCell(Player[] dataPlayerArray, Position lastPosition, StateTerritory stateTerritory){
         this.dataPlayerArray = dataPlayerArray;
         this.lastPosition = lastPosition;
+        this.stateTerritory = stateTerritory;
     }
 
     public Player[] getDataPlayerArray(){
@@ -20,6 +23,10 @@ public class StateCell{
 
     public Position getLastPosition(){
         return lastPosition;
+    }
+
+    public StateTerritory getStateTerritory() {
+        return stateTerritory;
     }
 
 }
