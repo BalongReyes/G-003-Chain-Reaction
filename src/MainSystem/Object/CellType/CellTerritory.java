@@ -7,7 +7,6 @@ import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerPlayers;
 import ManagerSystem.Manager.ManagerCell.ManagerTerritory;
-import Settings.SettingsCell;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -36,28 +35,10 @@ public class CellTerritory extends Cell{
     
 // Main Methods ==============================================================================================
 
-    @Override
-    public boolean abstractConfirmAddAtoms(Player player, boolean explodeAdd){
-        if(getManagerTerritory().territoryNotOwned()){
-            getManagerTerritory().setTerritory(player);
-            if(!explodeAdd && !getManagerAtoms().checkAtoms(Player.Dead)) return false;
-        }else if(!getManagerTerritory().territoryCheckOwner(player)){
-            if(explodeAdd){
-                getManagerTerritory().incrementTerritoryDestroy();
-                if(getManagerTerritory().getTerritoryDestroy() >= SettingsCell.maxTerritoryHeath){
-                    getManagerTerritory().reset();
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public boolean abstractValidateClickAddAtom(Player player){
+    public boolean territoryValidate(Player player) {
         return getManagerTerritory().territoryCheckOwner(player, Player.Dead);
     }
-
+    
     @Override
     public void reset(){
         super.reset();

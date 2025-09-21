@@ -6,6 +6,7 @@ import DataSystem.Type.TypeCellPart;
 import static DataSystem.Type.TypeCellPart.special;
 import MainSystem.Main.Console;
 import MainSystem.Object.Cell;
+import ManagerSystem.Rules.RuleManager;
 import java.awt.Color;
 import java.util.ArrayList;
 
@@ -172,4 +173,11 @@ public class ManagerAtoms{
         }
     }
     
+    public void confirmAddAtomByRule(Player player, boolean explodeAdd) {
+        RuleManager.applyRule(this.parent, player, explodeAdd);
+    }
+
+    public boolean validateClickAddAtomByRule(Player player) {
+        return RuleManager.isValid(this.parent, player);
+    }
 }
