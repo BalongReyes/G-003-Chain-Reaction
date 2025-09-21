@@ -117,11 +117,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                     }
                     case 2 -> {
                         if(explodeAdd){
-                            if(SettingsCell.threeColorCell){
-                                getManagerAtoms().add(player);
-                            }else{
-                                getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                            }
+                            getManagerAtoms().replaceAllThenAdd(Player.Dead);
                         }else{
                             if(getManagerAtoms().checkAtoms(player)){
                                 getManagerAtoms().replaceAllThenAdd(player);
@@ -131,7 +127,43 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 }
             }
             case 4 -> {
-                // next update
+                switch(getManagerAtoms().differentAtomsSize()){
+                    case 0 -> {
+                        getManagerAtoms().add(player);
+                    }
+                    case 1 -> {
+                        switch(getManagerAtoms().atomsSize()){
+                            case 0, 1, 2 -> {
+                                getManagerAtoms().add(player);
+                            }
+                            case 3 -> {
+                                if(explodeAdd && !getManagerAtoms().checkAtoms(player)){
+                                    getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                                }else{
+                                    if(getManagerAtoms().checkAtoms(player)){
+                                        getManagerAtoms().replaceAllThenAdd(player);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    case 2, 3 -> {
+                        switch(getManagerAtoms().atomsSize()){
+                            case 0, 1, 2 -> {
+                                getManagerAtoms().add(player);
+                            }
+                            case 3 -> {
+                                if(explodeAdd){
+                                    getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                                }else{
+                                    if(getManagerAtoms().checkAtoms(player)){
+                                        getManagerAtoms().replaceAllThenAdd(player);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }else if(getManagerAtoms().isMaxAtoms()){
             setPop(player);
@@ -181,7 +213,25 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                         }
                     }
                     case 4 -> {
-                        // next update
+                        switch(getManagerAtoms().getDifferentAtoms().length){
+                            case 0, 1 -> {
+                                valid = true;
+                            }
+                            case 2 -> {
+                                if(getManagerAtoms().atomsSize() == 3){
+                                    if(getManagerAtoms().checkAtoms(player)){
+                                        valid = true;
+                                    }
+                                }else{
+                                    valid = true;
+                                }
+                            }
+                            case 3 -> {
+                                if(getManagerAtoms().checkAtoms(player)){
+                                    valid = true;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -779,49 +829,31 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     protected int atomSize = 10;
     
-    private void drawAtoms(Graphics2D g){
-        int i;
-        double radians;
-        double x1;
-        double y1;
-        
-        int half = (20 - atomSize) + (int)(atomSize / 2);
-                
-        switch(getManagerAtoms().atomsSize()){
-            case 1 -> {
-                g.setColor(getManagerAtoms().getColor(0));
-                if(this.explodeReady){
-                    radians = this.angle / 180.0 * Math.PI;
-                    x1 = 3 * Math.cos(-radians);
-                    y1 = 3 * Math.sin(-radians);
-                    gEllipse(g, getX((int)x1 + half), getY((int)y1 + half), atomSize);
-                }else{
-                    gEllipse(g, getX(half), getY(half), atomSize);
-                }
+    private void drawAtoms(Graphics2D g) {
+        int atomCount = getManagerAtoms().atomsSize();
+        if (atomCount == 0) {
+            return;
+        }
+
+        int half = (20 - atomSize) + (atomSize / 2);
+
+        if (atomCount == 1) {
+            g.setColor(getManagerAtoms().getColor(0));
+            if (this.explodeReady) {
+                double radians = this.angle / 180.0 * Math.PI;
+                double x1 = 3 * Math.cos(-radians);
+                double y1 = 3 * Math.sin(-radians);
+                gEllipse(g, getX((int) x1 + half), getY((int) y1 + half), atomSize);
+            } else {
+                gEllipse(g, getX(half), getY(half), atomSize);
             }
-            case 2 -> {
-                for(i = 0; i <= 1; ++i){
-                    radians = (this.angle + (double) (i * 180)) / 180.0D * Math.PI;
-                    x1 = 7 * Math.cos(-radians);
-                    y1 = 7 * Math.sin(-radians);
-                    gEllipse(g, getManagerAtoms().getColor(i), getDoubleX(x1 + half), getDoubleY(y1 + half), atomSize);
-                }
-            }
-            case 3 -> {
-                for(i = 0; i <= 2; ++i){
-                    radians = (this.angle + (double) (i * 120)) / 180.0D * Math.PI;
-                    x1 = 8 * Math.cos(-radians);
-                    y1 = 8 * Math.sin(-radians);
-                    gEllipse(g, getManagerAtoms().getColor(i), getDoubleX(x1 + half), getDoubleY(y1 + half), atomSize);
-                }
-            }
-            case 4 -> {
-                for(i = 0; i <= 3; ++i){
-                    radians = (this.angle + (double) (i * 90)) / 180.0D * Math.PI;
-                    x1 = 8 * Math.cos(-radians);
-                    y1 = 8 * Math.sin(-radians);
-                    gEllipse(g, getManagerAtoms().getColor(i), getDoubleX(x1 + half), getDoubleY(y1 + half), atomSize);
-                }
+        } else {
+            double angleIncrement = 360.0 / atomCount;
+            for (int i = 0; i < atomCount; i++) {
+                double radians = (this.angle + i * angleIncrement) / 180.0 * Math.PI;
+                double x1 = 8 * Math.cos(-radians);
+                double y1 = 8 * Math.sin(-radians);
+                gEllipse(g, getManagerAtoms().getColor(i), getDoubleX(x1 + half), getDoubleY(y1 + half), atomSize);
             }
         }
     }

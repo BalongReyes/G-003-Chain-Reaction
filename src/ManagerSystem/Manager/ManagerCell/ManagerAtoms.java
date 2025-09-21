@@ -78,6 +78,9 @@ public class ManagerAtoms{
         if(cellPart != TypeCellPart.space) switch(cellPart){
             case special ->
                 setMaxAtoms(1);
+            case duplicator -> {
+                setMaxAtoms(4);
+            }
             default -> {
                 switch(managerSideCell.countSide()){
                     case 2 -> {
