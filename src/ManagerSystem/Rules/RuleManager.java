@@ -14,6 +14,10 @@ public class RuleManager {
     private static final List<Rule> rules = new ArrayList<>();
 
     static {
+        // Rule for territory cells
+        rules.add(new Rule(TypeCellPart.territory, 0, 0, 0, Rule.Action.TERRITORIAL_ACTION, Rule.Validation.TERRITORIAL_VALIDATE, Rule.Trigger.ANY));
+        rules.add(new Rule(TypeCellPart.territory, -1, -1, -1, null, Rule.Validation.DIFFERENT_OWNER_INVALID, Rule.Trigger.ANY));
+        
         // Rules for cells with maxAtoms = 2
         rules.add(new Rule(null, 2, 1, 1, Rule.Action.ADD, Rule.Validation.VALID, Rule.Trigger.CLICK));
         rules.add(new Rule(null, 2, 1, 1, Rule.Action.ADD, Rule.Validation.SAME_PLAYER_VALIDATE, Rule.Trigger.EXPLOSION));
@@ -31,9 +35,6 @@ public class RuleManager {
         rules.add(new Rule(null, 4, 3, 1, Rule.Action.ADD, Rule.Validation.VALID, Rule.Trigger.ANY));
         rules.add(new Rule(null, 4, 3, 2, Rule.Action.REPLACE_WITH_DEAD, Rule.Validation.VALID, Rule.Trigger.ANY));
         rules.add(new Rule(null, 4, 3, 3, Rule.Action.REPLACE_WITH_DEAD, Rule.Validation.VALID, Rule.Trigger.ANY));
-
-        // Rule for territory cells
-        rules.add(new Rule(TypeCellPart.territory, 0, 0, 0, Rule.Action.TERRITORIAL_ACTION, Rule.Validation.TERRITORIAL_VALIDATE, Rule.Trigger.ANY));
         
         // Rule for popping cells
         rules.add(new Rule(null, 0, 0, 0, Rule.Action.POP, Rule.Validation.DEFAULT, Rule.Trigger.ANY));
