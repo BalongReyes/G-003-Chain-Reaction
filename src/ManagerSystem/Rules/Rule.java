@@ -77,16 +77,16 @@ public class Rule {
 
     public void execute(Cell cell, Player player, boolean explodeAdd) {
         switch (action) {
-            case ADD:
+            case ADD -> {
                 cell.getManagerAtoms().add(player);
-                break;
-            case REPLACE:
+            }
+            case REPLACE -> {
                 cell.getManagerAtoms().replaceAllThenAdd(player);
-                break;
-            case REPLACE_WITH_DEAD:
+            }
+            case REPLACE_WITH_DEAD -> {
                 cell.getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                break;
-            case TERRITORIAL_ACTION:
+            }
+            case TERRITORIAL_ACTION -> {
                 if (cell instanceof CellTerritory territoryCell) {
                     if (territoryCell.getManagerTerritory().territoryNotOwned()) {
                         territoryCell.getManagerTerritory().setTerritory(player);
@@ -105,16 +105,16 @@ public class Rule {
                         }
                     }
                 }
-                break;
-            case POP:
+            }
+            case POP -> {
                 cell.setPop(player);
-                break;
+            }
         }
     }
 
     public Validation validate(Cell cell, Player player, boolean explodeAdd) {
         switch (validation) {
-            case TERRITORIAL_VALIDATE:
+            case TERRITORIAL_VALIDATE -> {
                 if (cell instanceof CellTerritory cellTerritory) {
                     boolean isOwnerOrUnowned = cellTerritory.territoryValidate(player);
                     if (isOwnerOrUnowned) {
@@ -123,18 +123,21 @@ public class Rule {
                     // If owned by another player
                     return explodeAdd ? Validation.VALID : Validation.INVALID;
                 }
-                break;
-            case SAME_PLAYER_VALIDATE:
+            }
+            case SAME_PLAYER_VALIDATE -> {
                 return cell.getManagerAtoms().checkAtoms(player) ? Validation.VALID : Validation.INVALID;
-            case DIFFERENT_PLAYER_VALIDATE:
+            }
+            case DIFFERENT_PLAYER_VALIDATE -> {
                 return !cell.getManagerAtoms().checkAtoms(player) ? Validation.VALID : Validation.INVALID;
-            case DIFFERENT_OWNER_INVALID:
+            }
+            case DIFFERENT_OWNER_INVALID -> {
                 if (cell instanceof CellTerritory territoryCell) {
                     if (territoryCell.getManagerTerritory().territoryOwned() && !territoryCell.getManagerTerritory().territoryCheckOwner(player)) {
                         return Validation.INVALID;
                     }
                 }
                 return Validation.VALID;
+            }
         }
         return validation;
     }
