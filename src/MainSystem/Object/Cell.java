@@ -1,4 +1,3 @@
-// src/MainSystem/Object/Cell.java
 
 package MainSystem.Object;
 
@@ -6,7 +5,6 @@ import DataSystem.Data.Player;
 import DataSystem.Data.Position;
 import DataSystem.ID.IDDirection;
 import DataSystem.State.StateCell;
-import DataSystem.State.StateTerritory;
 import DataSystem.ID.IDObject;
 import DataSystem.Interface.Clickable;
 import DataSystem.Interface.Renderable;
@@ -61,15 +59,161 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     }
     
 // -----------------------------------------------------------------------------------------------------------
+    
+    public boolean abstractConfirmAddAtoms(Player player, boolean explodeAdd){
+        return false;
+    }
+    
+    public void confirmAddAtoms(Player player, boolean explodeAdd){
+        
+        if(isCellPart(TypeCellPart.territory)){
+            if(!abstractConfirmAddAtoms(player, explodeAdd)){
+                return;
+            }
+        }
+        
+        if(getManagerAtoms().checkAtoms(Player.Dead)){
+            getManagerAtoms().replaceAll(player);
+            if(!explodeAdd) return;
+        }
 
-    public void confirmAddAtoms(Player player, boolean explodeAdd) {
-        getManagerAtoms().confirmAddAtomByRule(player, explodeAdd);
+        if(getManagerAtoms().atomsSize() < this.getManagerAtoms().getMaxAtoms()) switch(getManagerAtoms().getMaxAtoms()){
+            case 1 -> {
+                getManagerAtoms().add(player);
+            }
+            case 2 -> {
+                switch(getManagerAtoms().atomsSize()){
+                    case 0 -> {
+                        getManagerAtoms().add(player);
+                    }
+                    case 1 -> {
+                        if(explodeAdd && !getManagerAtoms().checkAtoms(player)){
+                            getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                        }else{
+                            getManagerAtoms().add(player);
+                        }
+                    }
+                }
+            }
+            case 3 -> {
+                switch(getManagerAtoms().atomsSize()){
+                    case 0, 1 -> {
+                        getManagerAtoms().add(player);
+                    }
+                    case 2 -> {
+                        if(explodeAdd){
+                            if(getManagerAtoms().checkAtoms(player)){
+                                getManagerAtoms().add(player);
+                            }else{
+                                getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                            }
+                        }else{
+                            if(getManagerAtoms().checkAtoms(player)){
+                                getManagerAtoms().replaceAllThenAdd(player);
+                            }
+                        }
+                    }
+                }
+            }
+            case 4 -> {
+                switch(getManagerAtoms().atomsSize()){
+                    case 0, 1, 2 -> {
+                        getManagerAtoms().add(player);
+                    }
+                    case 3 -> {
+                        if(explodeAdd){
+                            if(getManagerAtoms().checkAtoms(player)){
+                                getManagerAtoms().add(player);
+                            }else{
+                                getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                            }
+                        }else{
+                            if(getManagerAtoms().checkAtoms(player)){
+                                getManagerAtoms().replaceAllThenAdd(player);
+                            }
+                        }
+                    }
+                }
+            }
+        }else if(getManagerAtoms().isMaxAtoms()){
+            setPop(player);
+        }
     }
     
 // ...........................................................................................................
     
-    public boolean validateClickAddAtom(Player player) {
-        return getManagerAtoms().validateClickAddAtomByRule(player);
+    public boolean abstractValidateClickAddAtom(Player player){
+        return true;
+    }
+    
+    public boolean validateClickAddAtom(Player player){
+        boolean valid = false;
+        
+        if(getManagerAtoms().checkAtoms(Player.Dead) || getManagerAtoms().isEmpty()){
+            valid = true;
+        }else{
+            if(getManagerAtoms().atomsSize() >= getManagerAtoms().getMaxAtoms()){
+                if(getManagerAtoms().checkAtoms(player)){
+                    valid = true;
+                }
+            }else{
+                switch(getManagerAtoms().getMaxAtoms()){
+                    case 1, 2 -> {
+                        valid = true;
+                    }
+                    case 3 -> {
+                        switch(getManagerAtoms().getDifferentAtoms().length){
+                            case 0 -> {
+                                valid = true;
+                            }
+                            case 1 -> {
+                                if(getManagerAtoms().atomsSize() == 2){
+                                    if(getManagerAtoms().checkAtoms(player)){
+                                        valid = true;
+                                    }
+                                }else{
+                                    valid = true;
+                                }
+                            }
+                            case 2 -> {
+                                if(getManagerAtoms().checkAtoms(player)){
+                                    valid = true;
+                                }
+                            }
+                        }
+                    }
+                    case 4 -> {
+                        switch(getManagerAtoms().getDifferentAtoms().length){
+                            case 0, 1 -> {
+                                valid = true;
+                            }
+                            case 2 -> {
+                                if(getManagerAtoms().atomsSize() == 3){
+                                    if(getManagerAtoms().checkAtoms(player)){
+                                        valid = true;
+                                    }
+                                }else{
+                                    valid = true;
+                                }
+                            }
+                            case 3 -> {
+                                if(getManagerAtoms().checkAtoms(player)){
+                                    valid = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(valid && isCellPart(TypeCellPart.territory)){
+            if(!abstractValidateClickAddAtom(player)){
+                valid = false;
+            }
+        }
+        
+        return valid;
     }
     
 // TypeCell --------------------------------------------------------------------------------------------------
@@ -202,24 +346,16 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     protected Position lastPosition = null;
     
-    public void saveState(StateTerritory territoryState){
-        this.stateCellStack.add(new StateCell(getManagerAtoms().getArray(), getPosition(), territoryState));
+    public void saveState(){
+        this.stateCellStack.add(new StateCell(getManagerAtoms().getArray(), getPosition()));
         if(this.stateCellStack.size() > main.undoLimit){
             this.stateCellStack.remove(0);
         }
     }
 
-    public void saveState(){
-        saveState(null);
-    }
-
     public void undoState(){
         if(stateCellStack.empty()) return;
         StateCell sC = (StateCell) this.stateCellStack.pop();
-        restoreStateFrom(sC);
-    }
-
-    protected void restoreStateFrom(StateCell sC) {
         this.getManagerAtoms().setStateCell(sC);
         if(isCellPart(TypeCellPart.moveable)){
             ((CellMoveable)this).undoStateMove(sC);

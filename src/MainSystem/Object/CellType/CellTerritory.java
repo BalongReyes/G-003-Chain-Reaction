@@ -1,17 +1,17 @@
-// src/MainSystem/Object/CellType/CellTerritory.java
 
 package MainSystem.Object.CellType;
 
 import DataSystem.Data.Player;
-import DataSystem.State.StateCell;
 import DataSystem.State.StateTerritory;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerPlayers;
 import ManagerSystem.Manager.ManagerCell.ManagerTerritory;
+import Settings.SettingsCell;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.Stack;
 
 public class CellTerritory extends Cell{
 
@@ -36,10 +36,28 @@ public class CellTerritory extends Cell{
     
 // Main Methods ==============================================================================================
 
-    public boolean territoryValidate(Player player) {
+    @Override
+    public boolean abstractConfirmAddAtoms(Player player, boolean explodeAdd){
+        if(getManagerTerritory().territoryNotOwned()){
+            getManagerTerritory().setTerritory(player);
+            if(!explodeAdd && !getManagerAtoms().checkAtoms(Player.Dead)) return false;
+        }else if(!getManagerTerritory().territoryCheckOwner(player)){
+            if(explodeAdd){
+                getManagerTerritory().incrementTerritoryDestroy();
+                if(getManagerTerritory().getTerritoryDestroy() >= SettingsCell.maxTerritoryHeath){
+                    getManagerTerritory().reset();
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean abstractValidateClickAddAtom(Player player){
         return getManagerTerritory().territoryCheckOwner(player, Player.Dead);
     }
-    
+
     @Override
     public void reset(){
         super.reset();
@@ -168,22 +186,29 @@ public class CellTerritory extends Cell{
 
 // State =====================================================================================================
     
+    public Stack<StateTerritory> stateCellStack = new Stack<>();
+    
+    @Override
+    public void resetState(){
+        super.resetState();
+        stateCellStack.clear();
+    }
+    
     @Override
     public void saveState(){
-        saveState(new StateTerritory(getManagerTerritory()));
+        super.saveState();
+        this.stateCellStack.add(new StateTerritory(getManagerTerritory()));
+        if(this.stateCellStack.size() > main.undoLimit){
+            this.stateCellStack.remove(0);
+        }
     }
 
     @Override
     public void undoState(){
-        if (stateCellStack.empty()) return;
-        
-        StateCell sC = (StateCell) stateCellStack.pop();
-        
-        if (sC.getStateTerritory() != null) {
-            this.getManagerTerritory().setStateCell(sC.getStateTerritory());
-        }
-        
-        restoreStateFrom(sC);
+        super.undoState();
+        if(stateCellStack.empty()) return;
+        StateTerritory sC = (StateTerritory) this.stateCellStack.pop();
+        this.getManagerTerritory().setStateCell(sC);
     }
     
 }
