@@ -5,9 +5,11 @@ import DataSystem.Data.Position;
 import DataSystem.ID.IDDirection;
 import DataSystem.State.StateCell;
 import DataSystem.Type.TypeCellPart;
+import static MainSystem.Abstract.AbstractObject.main;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
+import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -45,109 +47,179 @@ public class CellMoveable extends Cell{
     
     @Override
     public void clickRightPressed(){
-        moveCell(true);
+        if(!HandlerTick.pause && !rightPressed && cellPart != TypeCellPart.space){
+            if(!main.isSimulating() && validateClickAddAtom(HandlerPlayers.getPlayer())){
+                moveCell(true);
+            }
+        }
     }
     
-    public void moveCell(boolean rightClicked){
-        if((isInvalidMove() || main.isSimulating()) && rightClicked) return;
+    public boolean moveCell(boolean rightClicked){
+        if((isInvalidMove() || main.isSimulating()) && rightClicked) return false;
         if(rightClicked){
             main.saveStates();
         }
-        boolean move = false;
+        
         Cell tC = null;
+        IDDirection d = null;
+        
         switch(moveable){
             case 1 -> {
                 if(HandlerCell.getAllCell(this, IDDirection.D, 1).isCellPart(TypeCellPart.space)){
-                    int distance = 0;
-                    while(tC == null || !tC.getManagerSideCell().haveD()){
-                        distance++;
-                        tC = HandlerCell.getAllCell(this, IDDirection.D, distance);
-                    }
-                    distance++;
-                    Cell unmoveable = HandlerCell.getAllCell(this, IDDirection.D, distance);
-                    if(unmoveable.isCellPart(TypeCellPart.moveable) && unmoveable.futureMove){
-                        return;
-                    }
-                    move = true;
+                    d = IDDirection.D;
                 }else if(HandlerCell.getAllCell(this, IDDirection.U, 1).isCellPart(TypeCellPart.space)){
-                    int distance = 0;
-                    while(tC == null || !tC.getManagerSideCell().haveU()){
-                        distance++;
-                        tC = HandlerCell.getAllCell(this, IDDirection.U, distance);
-                    }
-                    distance++;
-                    Cell unmoveable = HandlerCell.getAllCell(this, IDDirection.U, distance);
-                    if(unmoveable.isCellPart(TypeCellPart.moveable) && unmoveable.futureMove){
-                        return;
-                    }
-                    move = true;
+                    d = IDDirection.U;
                 }
-//                if(!move){
-//                    Cell cU = HandlerCell.getCell(this, IDDirection.U);
-//                    Cell cD = HandlerCell.getCell(this, IDDirection.D);
-//                    if(cU.isCellPart(TypeCellPart.moveable) && cU.futureMove){
-//                        output = 2;
-//                    }else if(cD.isCellPart(TypeCellPart.moveable) && cD.futureMove){
-//                        output = 2;
-//                    }else{
-//                        output = 1;
-//                    }
-//                }
             }
             case 2 -> {
                 if(HandlerCell.getAllCell(this, IDDirection.L, 1).isCellPart(TypeCellPart.space)){
-                    int distance = 0;
-                    while(tC == null || !tC.getManagerSideCell().haveL()){
-                        distance++;
-                        tC = HandlerCell.getAllCell(this, IDDirection.L, distance);
-                    }
-                    distance++;
-                    Cell unmoveable = HandlerCell.getAllCell(this, IDDirection.L, distance);
-                    if(unmoveable.isCellPart(TypeCellPart.moveable) && unmoveable.futureMove){
-                        return;
-                    }
-                    move = true;
+                    d = IDDirection.L;
                 }else if(HandlerCell.getAllCell(this, IDDirection.R, 1).isCellPart(TypeCellPart.space)){
-                    int distance = 0;
-                    while(tC == null || !tC.getManagerSideCell().haveR()){
-                        distance++;
-                        tC = HandlerCell.getAllCell(this, IDDirection.R, distance);
-                    }
-                    distance++;
-                    Cell unmoveable = HandlerCell.getAllCell(this, IDDirection.R, distance);
-                    if(unmoveable.isCellPart(TypeCellPart.moveable) && unmoveable.futureMove){
-                        return;
-                    }
-                    move = true;
+                    d = IDDirection.R;
                 }
-//                if(!move){
-//                    Cell cL = HandlerCell.getCell(this, IDDirection.L);
-//                    Cell cR = HandlerCell.getCell(this, IDDirection.R);
-//                    if(cL.isCellPart(TypeCellPart.moveable) && cL.futureMove){
-//                        output = 2;
-//                    }else if(cR.isCellPart(TypeCellPart.moveable) && cR.futureMove){
-//                        output = 2;
-//                    }else{
-//                        output = 1;
-//                    }
-//                }
             }
         }
-        if(move){
-            HandlerCell.swap(this, tC);
-            HandlerCell.updateCells();
-            if(rightClicked){
-                HandlerPlayers.nextPlayer();
-            }
+        
+        if(d == null){
+            return false;
         }
+                
+        int distance = 0;
+        while(tC == null || !tC.getManagerSideCell().haveSide(d)){
+            distance++;
+            tC = HandlerCell.getAllCell(this, d, distance);
+        }
+        if(distance <= 1){
+            return false;
+        }
+        
+        setSimualteMove(tC, d, rightClicked);
+        return true;
     }
     
     
 // Tickable ==================================================================================================
 
     @Override
+    public void tick(){
+        super.tick();
+        if(isCellPart(TypeCellPart.space)) return;
+        
+        if(!isSimulatingPop()){
+            tickMove();
+            if(!moving && simulateMove){
+                moveAnimation = 1.0D;
+                moveTick = main.moveBuffer;
+                HandlerCell.removeAllSideCells(this);
+            }
+        }
+    }
+    
+    @Override
     protected void setFocused(boolean focus){
         super.setFocused(focus);
+    }
+    
+// -----------------------------------------------------------------------------------------------------------
+    
+    private Cell cellMove = null;
+    private IDDirection cellMoveDirection = null;
+    private boolean moveThenAdd = false;
+    private boolean simulateMove = false;
+    
+    private Position sOriginalPosition = null, tOriginalPosition = null;
+    
+    public void setSimualteMove(Cell cellMove, IDDirection direction, boolean moveThenAdd){
+        sOriginalPosition = this.getPosition();
+        tOriginalPosition = cellMove.getPosition();
+        
+        this.cellMoveDirection = direction;
+        this.cellMove = cellMove;
+        this.moveThenAdd = moveThenAdd;
+        simulateMove = true;
+    }
+    
+    public boolean isSimualteMove(){
+        return simulateMove;
+    }
+    
+// -----------------------------------------------------------------------------------------------------------
+    
+    private int moveTick = 0;
+    public double moveAnimation = 0.0;
+    
+    public boolean moving = false;
+    
+    private void tickMove(){
+        if(moveTick > 0){
+            moving = true;
+            
+            moveTick--;
+            moveAnimation = (double) moveTick / (double) main.moveBuffer;
+            
+            double animation = 1 - this.moveAnimation;
+            double aRD, aR, aN;
+            
+            switch(cellMoveDirection){
+                case U, D -> {
+                    aRD = sOriginalPosition.y - cellMove.y;
+                    aR = animation * aRD;
+                    aN = sOriginalPosition.y - aR;
+                    setNewY(aN);
+                }
+                case L, R -> {
+                    aRD = sOriginalPosition.x - cellMove.x;
+                    aR = animation * aRD;
+                    aN = sOriginalPosition.x - aR;
+                    setNewX(aN);
+                }
+            }
+            
+            if(this.moveTick <= 0){
+                moveTick = 0;
+                moveAnimation = 0.0D;
+                simulateMove = false;
+                moving = false;
+                
+                HandlerCell.swapPosition(this, cellMove, sOriginalPosition, tOriginalPosition);
+                HandlerCell.updateCells();
+                
+                if(moveThenAdd){
+                    confirmAddAtoms(HandlerPlayers.getPlayer(), false);
+                    HandlerPlayers.nextPlayer();
+                }
+                
+                cellMove = null;
+            }
+        }
+    }
+    
+    protected void drawExplodeSet(Graphics2D g){
+        g.setColor(this.explodeColor);
+
+        double animation = 1 - this.explodeAnimation;
+        int aRD, aR;
+
+        if(this.getManagerSideCell().haveU()){
+            aRD = this.ry - this.getManagerSideCell().getSide(IDDirection.U).ry;
+            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
+            gEllipse(g, getX(drawExplodeHalf), getY(drawExplodeHalf - aR), atomSize);
+        }
+        if(this.getManagerSideCell().haveD()){
+            aRD = this.getManagerSideCell().getSide(IDDirection.D).ry - this.ry;
+            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
+            gEllipse(g, getX(drawExplodeHalf), getY(drawExplodeHalf + aR), atomSize);
+        }
+        if(this.getManagerSideCell().haveL()){
+            aRD = this.rx - this.getManagerSideCell().getSide(IDDirection.L).rx;
+            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
+            gEllipse(g, getX(drawExplodeHalf - aR), getY(drawExplodeHalf), atomSize);
+        }
+        if(this.getManagerSideCell().haveR()){
+            aRD = this.getManagerSideCell().getSide(IDDirection.R).rx - this.rx;
+            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
+            gEllipse(g, getX(drawExplodeHalf + aR), getY(drawExplodeHalf), atomSize);
+        }
     }
     
 // Renderable ================================================================================================

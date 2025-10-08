@@ -58,6 +58,18 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         this.ry = dp.ry;
     }
     
+    public void setNewX(double nx){
+        this.x = nx;
+    }
+    
+    public void setNewY(double ny){
+        this.y = ny;
+    }
+    
+    public boolean getExplodeReady(){
+        return getManagerAtoms().atomsSize() >= this.getManagerAtoms().getMaxAtoms();
+    }
+    
 // -----------------------------------------------------------------------------------------------------------
     
     public boolean abstractConfirmAddAtoms(Player player, boolean explodeAdd){
@@ -103,7 +115,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                     case 2 -> {
                         if(explodeAdd){
                             if(getManagerAtoms().checkAtoms(player)){
-                                getManagerAtoms().add(player);
+                                getManagerAtoms().replaceAllThenAdd(player);
                             }else{
                                 getManagerAtoms().replaceAllThenAdd(Player.Dead);
                             }
@@ -123,7 +135,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                     case 3 -> {
                         if(explodeAdd){
                             if(getManagerAtoms().checkAtoms(player)){
-                                getManagerAtoms().add(player);
+                                getManagerAtoms().replaceAllThenAdd(player);
                             }else{
                                 getManagerAtoms().replaceAllThenAdd(Player.Dead);
                             }
@@ -304,14 +316,13 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     }
 
     public void processFutureAtoms(){
-        
         for(Player a : futureAtoms.toArray(Player[]::new)){
-            confirmAddAtoms(a, true);
             if(isCellPart(TypeCellPart.moveable)){
-                if(explodeReady){
+                if(getExplodeReady()){
                     futureMoveReady = true;
                 }
             }
+            confirmAddAtoms(a, true);
             if(this.pop){
                 getManagerAtoms().replaceAll(a);
             }
@@ -366,7 +377,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
 // Clickable ================================================================== <editor-fold desc="Clickable">
     
-    private boolean leftPressed = false;
+    protected boolean leftPressed = false;
     
     @Override
     public void clickLeftPressed(){
@@ -375,7 +386,11 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 main.saveStates();
                 confirmAddAtoms(HandlerPlayers.getPlayer(), false);
                 if(isCellPart(TypeCellPart.moveable)){
-                    ((CellMoveable)this).moveCell(false);
+                    if(pop){
+                        ((CellMoveable)this).futureMove = true;
+                    }else{
+//                        ((CellMoveable)this).moveCell(false);
+                    }
                 }
                 HandlerPlayers.nextPlayer();
                 leftPressed = true;
@@ -393,7 +408,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         return leftPressed;
     }
 
-    private boolean rightPressed = false;
+    protected boolean rightPressed = false;
     
     @Override
     public void clickRightPressed(){
@@ -423,12 +438,13 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     @Override
     public void tick(){
+        if(isCellPart(TypeCellPart.space)) return;
+        
         tickCheckFocus();
         tickAnimations();
         
-        if(getManagerAtoms().getMaxAtoms() != 0 && !isCellPart(TypeCellPart.space)){
+        if(getManagerAtoms().getMaxAtoms() != 0){
             
-            tickExplodeReady();
             tickAngle();
             tickExplode();
 
@@ -446,12 +462,6 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         }
     }
    
-// -----------------------------------------------------------------------------------------------------------
-    
-    public void tickExplodeReady(){
-        explodeReady = getManagerAtoms().atomsSize() >= this.getManagerAtoms().getMaxAtoms();
-    }
-    
 // -----------------------------------------------------------------------------------------------------------
     
     protected void tickAnimations(){
@@ -547,9 +557,9 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     private void tickAngle(){
         if(this.focused && this.getManagerAtoms().checkAtoms(HandlerPlayers.getPlayer())){
-            angle += explodeReady ? 1.2 : 0.05;
+            angle += getExplodeReady() ? 1.2 : 0.05;
         }else{
-            angle += explodeReady ? 0.4 : 0.05;
+            angle += getExplodeReady() ? 0.4 : 0.05;
         }
         if(angle >= 360.0){
             angle = 0.0;
@@ -559,8 +569,6 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 // </editor-fold>
     
 // Renderable ================================================================ <editor-fold desc="Renderable">
-    
-    protected boolean explodeReady = false;
     
     private Color coordinateDefaultColor = new Color(50, 50, 50);
     
@@ -809,7 +817,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 
         if (atomCount == 1) {
             g.setColor(getManagerAtoms().getColor(0));
-            if (this.explodeReady) {
+            if (getManagerAtoms().getMaxAtoms() == 1) {
                 double radians = this.angle / 180.0 * Math.PI;
                 double x1 = 3 * Math.cos(-radians);
                 double y1 = 3 * Math.sin(-radians);

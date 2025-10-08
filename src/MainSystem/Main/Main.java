@@ -31,13 +31,14 @@ public class Main{
     
     public int undoLimit = 10;
     public int explodeBuffer = 200;
+    public int moveBuffer = 50;
     
     public int gapSize = 10;
     public int borderSize = 50;
     public int totalSize;
     public Dimension canvasSize;
     
-    public AbstractMap map = new Map1();
+    public AbstractMap map = new Map14();
     
 // Constructor ===============================================================================================
     
@@ -193,6 +194,9 @@ public class Main{
             }
             case 4 -> {
                 // Move ready
+                for(CellMoveable c : HandlerCell.getCellMoveableArray()){
+                    if(c.isSimualteMove()) return;
+                }
                 for(Cell c : HandlerCell.getArray()){
                     c.processFutureMoveReady();
                 }

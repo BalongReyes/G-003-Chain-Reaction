@@ -67,12 +67,11 @@ public class CellTerritory extends Cell{
 // Tickable ==================================================================================================
 
     @Override
-    public void tickExplodeReady(){
+    public boolean getExplodeReady(){
         if(getManagerTerritory().territoryOwned()){
-            explodeReady = getManagerAtoms().atomsSize() >= this.getManagerAtoms().getMaxAtoms();
-        }else{
-            explodeReady = false;
+            return getManagerAtoms().atomsSize() >= this.getManagerAtoms().getMaxAtoms();
         }
+        return false;
     }
 
     private int tickBlinkTerritoryDecay = 0;

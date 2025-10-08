@@ -7,10 +7,12 @@ import MainSystem.Abstract.AbstractObject;
 import MainSystem.Main.Main;
 import MainSystem.Object.Cell;
 import MainSystem.Object.CellType.CellDuplicator;
+import MainSystem.Object.CellType.CellMoveable;
 import MainSystem.Object.CellType.CellTeleport;
 import MainSystem.Object.CellType.CellNoEntry;
 import MainSystem.Object.CellType.CellSidePortal;
 import MainSystem.Object.CellType.CellSpecialPortal;
+import ManagerSystem.Manager.ManagerCell.ManagerSideCell;
 import Settings.SettingsCell;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,19 +27,17 @@ public class HandlerCell{
         if(o instanceof Cell c){
             cells.add(c);
         }
+        if(o instanceof CellMoveable cm){
+            moveableCells.add(cm);
+        }
     }
 
     public static void remove(AbstractObject o){
         if(o instanceof Cell c){
             cells.remove(c);
         }
-    }
-
-    public static void set(AbstractObject oldO, AbstractObject newO){
-        if(oldO instanceof Cell oldC){
-            if(newO instanceof Cell newC){
-                cells.set(cells.indexOf(oldC), newC);
-            }
+        if(o instanceof CellMoveable cm){
+            moveableCells.remove(cm);
         }
     }
 
@@ -46,6 +46,11 @@ public class HandlerCell{
         
         sC.setNewPosition(tC.getPosition());
         tC.setNewPosition(sDP);
+    }
+    
+    public static void swapPosition(Cell sC, Cell tC, Position sCp, Position tCp){
+        sC.setNewPosition(tCp);
+        tC.setNewPosition(sCp);
     }
     
     public static boolean check(AbstractObject o){
@@ -62,6 +67,14 @@ public class HandlerCell{
         });
     }
 
+// -----------------------------------------------------------------------------------------------------------
+    
+    public static ArrayList<CellMoveable> moveableCells = new ArrayList();
+    
+    public static CellMoveable[] getCellMoveableArray(){
+        return moveableCells.toArray(CellMoveable[]::new);
+    }
+    
 // -----------------------------------------------------------------------------------------------------------
     
     public static void ResetState(){
@@ -180,6 +193,17 @@ public class HandlerCell{
 
 // -----------------------------------------------------------------------------------------------------------
 
+    public static void removeAllSideCells(Cell c){
+        ManagerSideCell managerSideCell = c.getManagerSideCell();
+        Cell[] sideCells = managerSideCell.sideCells;
+        for(IDDirection d : IDDirection.values()){
+            Cell tC = sideCells[d.index];
+            if(tC == null) continue;
+            tC.getManagerSideCell().setSide(null, d.getInverted());
+            managerSideCell.setSide(null, d);
+        }
+    }
+    
     public static void updateCells(){
         
         for(Cell sC : getArray()){
