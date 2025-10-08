@@ -40,7 +40,8 @@ public class CellTerritory extends Cell{
     public boolean abstractConfirmAddAtoms(Player player, boolean explodeAdd){
         if(getManagerTerritory().territoryNotOwned()){
             getManagerTerritory().setTerritory(player);
-            if(!explodeAdd && !getManagerAtoms().checkAtoms(Player.Dead)) return false;
+            getManagerAtoms().replaceAll(player);
+            return false;
         }else if(!getManagerTerritory().territoryCheckOwner(player)){
             if(explodeAdd){
                 getManagerTerritory().incrementTerritoryDestroy();
