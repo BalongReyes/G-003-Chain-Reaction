@@ -118,6 +118,10 @@ public class ManagerAtoms{
     public boolean isEmpty(){
         return atoms.isEmpty();
     }
+    
+    public boolean isEmptyOrDead(){
+        return atoms.isEmpty() || checkAtoms(Player.Dead);
+    }
 
     public int atomsSize(){
         return atoms.size();

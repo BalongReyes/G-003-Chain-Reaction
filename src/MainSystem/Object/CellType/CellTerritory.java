@@ -101,13 +101,14 @@ public class CellTerritory extends Cell{
         super.tickTurn();
         
         Player territoryOwner = getManagerTerritory().getTerritory();
-        if(territoryOwner != null && territoryOwner != Player.Dead){
-            if(getManagerAtoms().isEmpty() || getManagerAtoms().checkAtoms(Player.Dead)){
+        
+        if(territoryOwner != null && territoryOwner != Player.Dead && territoryOwner == HandlerPlayers.currentPlayer){
+            if(getManagerAtoms().isEmptyOrDead()){
                 getManagerTerritory().incrementDecay();
             }else{
                 getManagerTerritory().resetTerritoryDecay();
             }
-            if(getManagerTerritory().getTerritoryDecay() > Player.CountAlive() || territoryOwner.atoms == 0){
+            if(getManagerTerritory().getTerritoryDecay() > 1 || territoryOwner.atoms == 0){
                 getManagerTerritory().reset();
             }
         }
@@ -157,7 +158,7 @@ public class CellTerritory extends Cell{
                 g.setColor(Color.red);
             }else{
                 if(HandlerPlayers.checkPlayer(getManagerTerritory().getTerritory()) && !focused){
-                    if(getManagerAtoms().isEmpty() || getManagerAtoms().checkAtoms(Player.Dead)){
+                    if(getManagerAtoms().isEmptyOrDead()){
                         if(blinkTerritoryDecay){
                             g.setColor(Color.red);
                         }else{

@@ -330,10 +330,11 @@ public class HandlerCell{
 
         for(Cell sC : getArray()){
             sC.updateMaxAtoms();
-            if(sC instanceof CellTeleport cm){
-                cm.updateTeleport();
-            } else if (sC instanceof CellDuplicator cd) {
-                cd.updateDuplicator();
+            switch(sC){
+                case CellTeleport cm -> cm.updateTeleport();
+                case CellDuplicator cd -> cd.updateDuplicator();
+                default -> {
+                }
             }
         }
         
@@ -348,7 +349,7 @@ public class HandlerCell{
     
 // -----------------------------------------------------------------------------------------------------------
     
-    public static void afterTurn(){
+    public static void tickTurn(){
         cells.forEach((c) -> {
             c.tickTurn();
         });

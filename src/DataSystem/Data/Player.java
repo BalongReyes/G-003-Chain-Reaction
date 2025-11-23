@@ -9,8 +9,9 @@ public enum Player{
     
     Dead(Color.gray),
     Player1(Color.cyan, "Sedian"),
-    Player2(Color.magenta, "CJ"),
-    Player3(Color.yellow, "Test");
+//    Player2(Color.magenta, "CJ"),
+    Player3(Color.yellow, "Wifeyy"),
+    Player4(Color.green, "Jadey");
 
 // ===========================================================================================================
     
@@ -18,6 +19,8 @@ public enum Player{
     
     public Color color;
     public String name = null;
+    
+    public boolean hintEnabled = false;
     
 // Constructor ===============================================================================================
     

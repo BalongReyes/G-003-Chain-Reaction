@@ -69,7 +69,7 @@ public class CellTeleport extends Cell{
         
         animationTick++;
         int animationTickMax = 100;
-        if(focused || focusedTeleport){
+        if(focused || partFocused){
             animationTickMax = 10;
         }
         if(animationTick > animationTickMax){
@@ -93,7 +93,7 @@ public class CellTeleport extends Cell{
         super.setFocused(focus);
         
         Cell c = getManagerTeleport().getTeleportCell();
-        if(c != null) c.focusedTeleport = focus;
+        if(c != null) c.partFocused = focus;
     }
     
 // Renderable ================================================================================================
@@ -124,11 +124,14 @@ public class CellTeleport extends Cell{
         Color dash1;
         Color dash2;
         
-        if(isInvalidMove()){
+        if(focused && isInvalidMove()){
+            dash1 = Color.red;
+            dash2 = Color.red;
+        }else if(partFocused && getManagerTeleport().getTeleportCell().isInvalidMove()){
             dash1 = Color.red;
             dash2 = Color.red;
         }else{
-            if(focused || focusedTeleport){
+            if(focused || partFocused){
                 dash1 = Color.white;
                 dash2 = Color.gray;
             }else{

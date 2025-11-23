@@ -84,8 +84,12 @@ public class CellSpecialPortal extends Cell{
             Cell c = this.getManagerSideCell().getSide(d);
             if((!c.isCellPart(TypeCellPart.specialPortal) || d != IDDirection.U && d != IDDirection.L) && !c.isCellPart(TypeCellPart.portal)){
                 
-                if((this.focused || c.focused) && !main.isSimulating()){
-                    g.setColor(!this.isInvalidMove() && !c.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
+                if(!main.isSimulating() && (this.focused || c.focused)){
+                    if(this.focused){
+                        g.setColor(!this.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
+                    }else if(c.focused){
+                        g.setColor(!c.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
+                    }
                 }else if(this.specialPortalUnderground[d.index]){
                     g.setColor(this.portalLineUndergroundColor);
                 }else{

@@ -7,7 +7,8 @@ public class SettingsCell {
    public static int xCell = 12;
    public static int yCell = 9;
    
-   public static Color cellBackground = new Color(10, 10, 10);
+   public static Color cellBackgroundValid = new Color(10, 10, 10);
+   public static Color cellBackgroundInvalid = new Color(50, 0, 0);
    public static Color cellBoxColor = new Color(200, 200, 200);
    public static Color invalidColor = Color.red;
    

@@ -53,6 +53,8 @@ public class HandlerPlayers{
     
     public static void tick(){
         if((nextPlayer || nextPlayerForced) && !main.isSimulating()){
+            HandlerCell.tickTurn();
+            
             playerMoves++;
             if(playerMoves >= movesPerTurn || nextPlayerForced){
                 currentPlayer = Player.GetNextPlayer(currentPlayer, nextPlayerForced);
@@ -61,7 +63,6 @@ public class HandlerPlayers{
 
             nextPlayer = false;
             nextPlayerForced = false;
-            HandlerCell.afterTurn();
         }
     }
 

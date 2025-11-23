@@ -97,6 +97,22 @@ public abstract class AbstractObject{
         return (int)y + size.height + addY;
     }
     
+    public int getXWhalf(){
+        return (int)x + (size.width / 2);
+    }
+
+    public int getYHhalf(){
+        return (int)y + (size.height / 2);
+    }
+    
+    public int getXWhalf(int addX){
+        return (int)x + (size.width / 2) + addX;
+    }
+
+    public int getYHhalf(int addY){
+        return (int)y + (size.height / 2) + addY;
+    }
+    
     public Rectangle getBounds(){
         return new Rectangle(new Point((int)x, (int)y), size);
     }

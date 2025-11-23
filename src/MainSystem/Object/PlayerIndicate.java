@@ -21,8 +21,9 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
     private double angle = 0.0D;
     private double radius = 0.0D;
     private int radiusTick = 0;
+    
     private boolean leftPressed = false;
-    public boolean rightPressed = false;
+    private boolean rightPressed = false;
 
     public PlayerIndicate(double x, double y, Player player){
         super(x, y, new Dimension(0, 0), IDObject.PlayerIndicate);
@@ -153,6 +154,10 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
 
     @Override
     public void clickRightPressed(){
+        if(!this.rightPressed){
+            player.hintEnabled = !player.hintEnabled;
+        }
+        
         this.rightPressed = true;
     }
 

@@ -161,7 +161,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     public boolean validateClickAddAtom(Player player){
         boolean valid = false;
         
-        if(getManagerAtoms().checkAtoms(Player.Dead) || getManagerAtoms().isEmpty()){
+        if(getManagerAtoms().isEmptyOrDead()){
             valid = true;
         }else{
             if(getManagerAtoms().atomsSize() >= getManagerAtoms().getMaxAtoms()){
@@ -385,12 +385,8 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             if(!main.isSimulating() && validateClickAddAtom(HandlerPlayers.getPlayer())){
                 main.saveStates();
                 confirmAddAtoms(HandlerPlayers.getPlayer(), false);
-                if(isCellPart(TypeCellPart.moveable)){
-                    if(pop){
-                        ((CellMoveable)this).futureMove = true;
-                    }else{
-//                        ((CellMoveable)this).moveCell(false);
-                    }
+                if(isCellPart(TypeCellPart.moveable) && pop){
+                    ((CellMoveable)this).futureMove = true;
                 }
                 HandlerPlayers.nextPlayer();
                 leftPressed = true;
@@ -504,7 +500,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 // -----------------------------------------------------------------------------------------------------------
     
     public boolean focused = false;
-    public boolean focusedTeleport = false;
+    public boolean partFocused = false;
     
     public IDDirection sideFocused = null;
     public Cell sideFocusedCell = null;
@@ -553,7 +549,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
 // -----------------------------------------------------------------------------------------------------------
     
-    private double angle = (double)MethodsNumber.getRandomNumber(1, 359);
+    private double angle = (double)MethodsNumber.getRandomNumber(0, 359);
     
     private void tickAngle(){
         if(this.focused && this.getManagerAtoms().checkAtoms(HandlerPlayers.getPlayer())){
@@ -593,7 +589,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         drawCoordinate(g);
         if(isCellPart(TypeCellPart.space)) return;
         drawPortalDesign(g);
-        drawCellBorder(g);
+        drawCellBackground(g);
         drawDesign(g);
     }
     
@@ -637,22 +633,21 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             if(
                 c.isCellPart(TypeCellPart.portal) || c.isCellPart(TypeCellPart.specialPortal) ||
                 isCellPart(TypeCellPart.portal) || isCellPart(TypeCellPart.specialPortal)
-            ) switch(d){
-                case U -> {
-                    drawPortalDesignColor(g, d);
-                    if(this.ry - c.ry >= 2) this.gFillRect(g, 13, -4, -25, -36);
-                }
-                case D -> {
-                    drawPortalDesignColor(g, d);
-                    if(c.ry - this.ry >= 2) this.gFillRect(g, 13, 40, -25, -36);
-                }
-                case L -> {
-                    drawPortalDesignColor(g, d);
-                    if(this.rx - c.rx >= 2) this.gFillRect(g, -4, 13, -36, -25);
-                }
-                case R -> {
-                    drawPortalDesignColor(g, d);
-                    if(c.rx - this.rx >= 2) this.gFillRect(g, 40, 13, -36, -25);
+            ){
+                drawPortalDesignColor(g, d);
+                switch(d){
+                    case U -> {
+                        if(this.ry - c.ry >= 2) this.gFillRect(g, 13, -4, -25, -36);
+                    }
+                    case D -> {
+                        if(c.ry - this.ry >= 2) this.gFillRect(g, 13, 40, -25, -36);
+                    }
+                    case L -> {
+                        if(this.rx - c.rx >= 2) this.gFillRect(g, -4, 13, -36, -25);
+                    }
+                    case R -> {
+                        if(c.rx - this.rx >= 2) this.gFillRect(g, 40, 13, -36, -25);
+                    }
                 }
             }
         }
@@ -671,33 +666,15 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
 // ...........................................................................................................
     
-    public Color drawBorder = null;
-    
-    private void drawCellBorder(Graphics2D g){
-        gFillRect(g, SettingsCell.cellBackground, 0, 0, 0, 0);
-        
-        if(!main.isSimulating() && focused){
-            drawCellBorderFocused(g);
-            drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
-        }
-
-        if(drawBorder != null){
-            g.setColor(drawBorder);
+    private void drawCellBackground(Graphics2D g){
+        if(HandlerPlayers.currentPlayer.hintEnabled){
+            gFillRect(g, isInvalidMove() ? SettingsCell.cellBackgroundInvalid : SettingsCell.cellBackgroundValid, 0, 0, 0, 0);
         }else{
-            g.setColor(SettingsCell.cellBoxColor);
+            gFillRect(g, SettingsCell.cellBackgroundValid, 0, 0, 0, 0);
         }
-        g.setStroke(new BasicStroke(2.0F));
-        gDrawRect(g, 0, 0, 0, 0);
-        g.setStroke(new BasicStroke(1.0F));
-        
-        drawBorder = null;
     }
     
-    protected void drawCellBorderFocused(Graphics2D g){
-        for(Cell c : getManagerSideCell().getArray()) if(c != null){
-            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
-        }
-    }
+// ...........................................................................................................
     
     private void drawDesign(Graphics2D g){
         g.setColor(Color.lightGray);
@@ -800,9 +777,53 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     @Override
     public void renderLayer3(Graphics2D g){
         if(isCellPart(TypeCellPart.space)) return;
-        drawAtoms(g);
+        drawCellBorder(g);
     }
     
+// ...........................................................................................................
+    
+    public Color drawBorder = null;
+    
+    private void drawCellBorder(Graphics2D g){
+        if(!main.isSimulating() && focused){
+            drawCellBorderFocused(g);
+            drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
+        }
+
+        if(drawBorder != null){
+            g.setColor(drawBorder);
+        }else{
+            g.setColor(SettingsCell.cellBoxColor);
+        }
+        g.setStroke(new BasicStroke(2.0F));
+        gDrawRect(g, 0, 0, 0, 0);
+        g.setStroke(new BasicStroke(1.0F));
+        
+        drawBorder = null;
+    }
+    
+    protected void drawCellBorderFocused(Graphics2D g){
+        for(Cell c : getManagerSideCell().getArray()) if(c != null){
+            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
+        }
+    }
+    
+// Layer 4 ---------------------------------------------------------------------------------------------------
+    
+    @Override
+    public void renderLayer4(Graphics2D g){
+        if(isCellPart(TypeCellPart.space)) return;
+    }
+    
+// Layer 5 ---------------------------------------------------------------------------------------------------
+    
+    @Override
+    public void renderLayer5(Graphics2D g){
+        if(isCellPart(TypeCellPart.space)) return;
+        drawAtoms(g);
+        drawExplode(g);
+    }
+
 // ...........................................................................................................
     
     protected int atomSize = 10;
@@ -834,21 +855,6 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 gEllipse(g, getManagerAtoms().getColor(i), getDoubleX(x1 + half), getDoubleY(y1 + half), atomSize);
             }
         }
-    }
-    
-// Layer 4 ---------------------------------------------------------------------------------------------------
-    
-    @Override
-    public void renderLayer4(Graphics2D g){
-        if(isCellPart(TypeCellPart.space)) return;
-    }
-    
-// Layer 5 ---------------------------------------------------------------------------------------------------
-    
-    @Override
-    public void renderLayer5(Graphics2D g){
-        if(isCellPart(TypeCellPart.space)) return;
-        drawExplode(g);
     }
     
 // ...........................................................................................................

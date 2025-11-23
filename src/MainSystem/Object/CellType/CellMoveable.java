@@ -194,6 +194,7 @@ public class CellMoveable extends Cell{
         }
     }
     
+    @Override
     protected void drawExplodeSet(Graphics2D g){
         g.setColor(this.explodeColor);
 
@@ -274,6 +275,7 @@ public class CellMoveable extends Cell{
                 g.setColor(Color.gray);
             }
         }
+        
         g.drawLine(getX(12), getY(12), getX(12), getY(14));
         g.drawLine(getXW(-12), getY(12), getXW(-12), getY(14));
         g.drawLine(getX(12), getYH(-12), getX(12), getYH(-14));
