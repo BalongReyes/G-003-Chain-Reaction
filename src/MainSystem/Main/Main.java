@@ -7,7 +7,7 @@ import DataSystem.Maps.AbstractMap;
 import DataSystem.Maps.*;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
-import MainSystem.Object.CellType.CellDuplicator;
+import MainSystem.Object.CellType.CellMirror;
 import MainSystem.Object.CellType.CellTeleport;
 import MainSystem.Object.CellType.CellMoveable;
 import MainSystem.Object.CellType.CellNoEntry;
@@ -249,29 +249,29 @@ public class Main{
     public void setMap(){
         
         int[][] mapData = null;
-        int[][] mapMirrorData = null;
+        int[][] mapTeleportData = null;
         int[][] mapNoEntryData = null;
         int[][] mapMoveable = null;
-        int[][] mapDuplicator = null;
+        int[][] mapMirrorData = null;
         
         if(this.map != null){
             mapData = map.getMap();
-            mapMirrorData = map.getTeleportCells();
+            mapTeleportData = map.getTeleportCells();
             mapNoEntryData = map.getNoEntryCells();
             mapMoveable = map.getMoveable();
-            mapDuplicator = map.getDuplicatorCells();
+            mapMirrorData = map.getMirrorCells();
             if(mapData != null){
                 for(int x = 0; x < SettingsCell.xCell; x++){
                     for(int y = 0; y < SettingsCell.yCell; y++){
                         int mapBit = mapData[y][x];
                         
-                        int mapBitMirror = -1;
+                        int mapBitTeleport = -1;
                         int mapBitNoEntry = -1;
                         int mapBitMoveable = -1;
-                        int mapBitDuplicator = -1;
+                        int mapBitMirror = -1;
                         
-                        if(mapMirrorData != null){
-                            mapBitMirror = mapMirrorData[y][x];
+                        if(mapTeleportData != null){
+                            mapBitTeleport = mapTeleportData[y][x];
                         }
                         if(mapNoEntryData != null){
                             mapBitNoEntry = mapNoEntryData[y][x];
@@ -279,8 +279,8 @@ public class Main{
                         if(mapMoveable != null){
                             mapBitMoveable = mapMoveable[y][x];
                         }
-                        if(mapDuplicator != null){
-                            mapBitDuplicator = mapDuplicator[y][x];
+                        if(mapMirrorData != null){
+                            mapBitMirror = mapMirrorData[y][x];
                         }
                         
                         TypeCellPart typeCell = TypeCellPart.getTypeCellPart(mapBit);
@@ -289,7 +289,7 @@ public class Main{
                         
                         switch(typeCell){
                             case teleport -> {
-                                ((CellTeleport)c).setTeleport(mapBitMirror);
+                                ((CellTeleport)c).setTeleport(mapBitTeleport);
                             }
                             case noEntry -> {
                                 ((CellNoEntry)c).setNoEntry(mapBitNoEntry);
@@ -297,8 +297,8 @@ public class Main{
                             case moveable -> {
                                 ((CellMoveable)c).setMoveable(mapBitMoveable);
                             }
-                            case duplicator -> {
-                                ((CellDuplicator)c).setDuplicator(mapBitDuplicator);
+                            case mirror -> {
+                                ((CellMirror)c).setMirror(mapBitMirror);
                             }
                         }
                         

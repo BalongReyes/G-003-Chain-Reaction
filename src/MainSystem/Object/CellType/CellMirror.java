@@ -6,16 +6,16 @@ import MainSystem.Methods.MethodsNumber;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
-import ManagerSystem.Manager.ManagerCell.ManagerDuplicator;
+import ManagerSystem.Manager.ManagerCell.ManagerMirror;
 import Settings.SettingsCell;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.List;
 
-public class CellDuplicator extends Cell {
+public class CellMirror extends Cell {
 
-    public ManagerDuplicator managerDuplicator;
+    public ManagerMirror managerMirror;
     private boolean isSyncing = false;
     
     private int animationTickCount1 = 0, animationTickCount2 = 0;
@@ -23,33 +23,33 @@ public class CellDuplicator extends Cell {
     private int animationTick1 = 0, animationTick2 = 0;
     private boolean animationPhase1 = false, animationPhase2 = false;
 
-    public CellDuplicator(double x, double y, int rx, int ry) {
+    public CellMirror(double x, double y, int rx, int ry) {
         super(x, y, rx, ry);
-        cellPart = TypeCellPart.duplicator;
-        managerDuplicator = new ManagerDuplicator(this);
+        cellPart = TypeCellPart.mirror;
+        managerMirror = new ManagerMirror(this);
         
         animationTick1 = MethodsNumber.getRandomNumber(0, 40);
         animationTick2 = MethodsNumber.getRandomNumber(0, 40);
     }
 
-    public ManagerDuplicator getManagerDuplicator() {
-        return managerDuplicator;
+    public ManagerMirror getManagerMirror() {
+        return managerMirror;
     }
 
-    public void setDuplicator(int duplicatorCellPart) {
-        managerDuplicator.setDuplicateCellPart(duplicatorCellPart);
+    public void setMirror(int mirrorCellPart) {
+        managerMirror.setMirrorCellPart(mirrorCellPart);
     }
 
-    public boolean isDuplicatorPart(int duplicatorCellPart) {
-        return getManagerDuplicator().getDuplicatorCellPart() == duplicatorCellPart;
+    public boolean isMirrorPart(int mirrorCellPart) {
+        return getManagerMirror().getMirrorCellPart() == mirrorCellPart;
     }
 
-    public void updateDuplicator() {
-        List<Cell> duplicators = HandlerCell.getCellDuplicator(getManagerDuplicator().getDuplicatorCellPart());
-        if (duplicators != null) {
-            for (Cell c : duplicators) {
+    public void updateMirror() {
+        List<Cell> mirrors = HandlerCell.getCellMirror(getManagerMirror().getMirrorCellPart());
+        if (mirrors != null) {
+            for (Cell c : mirrors) {
                 if (c != this) {
-                    getManagerDuplicator().addDuplicatorCell(c);
+                    getManagerMirror().addMirrorCell(c);
                 }
             }
         }
@@ -64,11 +64,11 @@ public class CellDuplicator extends Cell {
 
         isSyncing = true;
         super.confirmAddAtoms(player, explodeAdd);
-        for (Cell duplicatorCell : getManagerDuplicator().getDuplicatorCells()) {
-            if (duplicatorCell != null) {
-                ((CellDuplicator) duplicatorCell).isSyncing = true;
-                duplicatorCell.confirmAddAtoms(player, explodeAdd);
-                ((CellDuplicator) duplicatorCell).isSyncing = false;
+        for (Cell cellMirror : getManagerMirror().getMirrorCells()) {
+            if (cellMirror != null) {
+                ((CellMirror) cellMirror).isSyncing = true;
+                cellMirror.confirmAddAtoms(player, explodeAdd);
+                ((CellMirror) cellMirror).isSyncing = false;
             }
         }
         isSyncing = false;
@@ -80,9 +80,9 @@ public class CellDuplicator extends Cell {
             return;
         }
         super.setPop(popPlayer);
-        for (Cell duplicatorCell : getManagerDuplicator().getDuplicatorCells()) {
-            if (duplicatorCell != null) {
-                duplicatorCell.setPop(popPlayer);
+        for (Cell mirrorCell : getManagerMirror().getMirrorCells()) {
+            if (mirrorCell != null) {
+                mirrorCell.setPop(popPlayer);
             }
         }
     }
@@ -140,7 +140,7 @@ public class CellDuplicator extends Cell {
     protected void setFocused(boolean focus){
         super.setFocused(focus);
         
-        for(Cell c : getManagerDuplicator().getDuplicatorCells()){
+        for(Cell c : getManagerMirror().getMirrorCells()){
             c.partFocused = focus;
         }
     }
@@ -190,7 +190,7 @@ public class CellDuplicator extends Cell {
     public void drawCellBorderFocused(Graphics2D g){
         super.drawCellBorderFocused(g);
         
-        for(Cell c : getManagerDuplicator().getDuplicatorCells()){
+        for(Cell c : getManagerMirror().getMirrorCells()){
             if(c.drawBorder != null) continue;
             c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
             c.drawCellBorderFocused(g);

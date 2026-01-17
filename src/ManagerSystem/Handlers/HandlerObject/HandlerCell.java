@@ -6,7 +6,7 @@ import DataSystem.Type.TypeCellPart;
 import MainSystem.Abstract.AbstractObject;
 import MainSystem.Main.Main;
 import MainSystem.Object.Cell;
-import MainSystem.Object.CellType.CellDuplicator;
+import MainSystem.Object.CellType.CellMirror;
 import MainSystem.Object.CellType.CellMoveable;
 import MainSystem.Object.CellType.CellTeleport;
 import MainSystem.Object.CellType.CellNoEntry;
@@ -117,11 +117,11 @@ public class HandlerCell{
         }
     }
     
-    public static List<Cell> getCellDuplicator(int duplicatorCellPart) {
+    public static List<Cell> getCellMirror(int mirrorCellPart) {
         List<Cell> output = new ArrayList<>();
         for (Cell c : getArray()) {
-            if (c instanceof CellDuplicator cm) {
-                if (cm.isDuplicatorPart(duplicatorCellPart)) {
+            if (c instanceof CellMirror cm) {
+                if (cm.isMirrorPart(mirrorCellPart)) {
                     output.add(c);
                 }
             }
@@ -331,8 +331,8 @@ public class HandlerCell{
         for(Cell sC : getArray()){
             sC.updateMaxAtoms();
             switch(sC){
-                case CellTeleport cm -> cm.updateTeleport();
-                case CellDuplicator cd -> cd.updateDuplicator();
+                case CellTeleport ct -> ct.updateTeleport();
+                case CellMirror cm -> cm.updateMirror();
                 default -> {
                 }
             }

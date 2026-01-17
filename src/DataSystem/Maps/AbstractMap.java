@@ -46,10 +46,10 @@ public abstract class AbstractMap{
     
 // -----------------------------------------------------------------------------------------------------------
     
-    public int[][] duplicatorCells;
+    public int[][] mirrorCells;
 
-    public int[][] getDuplicatorCells(){
-        return duplicatorCells;
+    public int[][] getMirrorCells(){
+        return mirrorCells;
     }
     
 }

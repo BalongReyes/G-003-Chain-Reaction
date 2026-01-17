@@ -23,7 +23,7 @@ public class Map15 extends AbstractMap{
             {1, 1, 1 , 5, 0 , 0, 0, 2, 1, 2, 0, 0, 0 , 5, 1 , 1, 1}
         };
         
-        this.duplicatorCells = new int[][]{
+        this.mirrorCells = new int[][]{
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
             {0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0}, 

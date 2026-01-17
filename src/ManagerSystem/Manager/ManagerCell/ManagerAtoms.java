@@ -79,7 +79,7 @@ public class ManagerAtoms{
             case special -> {
                 setMaxAtoms(1);
             }
-            case duplicator -> {
+            case mirror -> {
                 setMaxAtoms(4);
             }
             default -> {

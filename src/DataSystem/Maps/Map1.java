@@ -15,7 +15,7 @@ public class Map1 extends AbstractMap {
             {1, 1, 1 , 1, 1, 1, 1, 1, 1 , 1, 1},
             {1, 1, 1 , 1, 1, 1, 1, 1, 1 , 1, 1}
         };
-        this.duplicatorCells = new int[][]{
+        this.mirrorCells = new int[][]{
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
