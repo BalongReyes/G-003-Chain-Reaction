@@ -2,51 +2,51 @@
 package MainSystem.Object.CellType;
 
 import DataSystem.Data.Player;
-import DataSystem.State.StateTerritory;
+import DataSystem.State.StateShield;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerPlayers;
-import ManagerSystem.Manager.ManagerCell.ManagerTerritory;
+import ManagerSystem.Manager.ManagerCell.ManagerShield;
 import Settings.SettingsCell;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Stack;
 
-public class CellTerritory extends Cell{
+public class CellShield extends Cell{
 
-    public CellTerritory(double x, double y, int rx, int ry){
+    public CellShield(double x, double y, int rx, int ry){
         super(x, y, rx, ry);
         
-        managerTerritory = new ManagerTerritory(this);
-        cellPart = TypeCellPart.territory;
+        managerShield = new ManagerShield(this);
+        cellPart = TypeCellPart.shield;
     }
     
-// ManagerTerritory ==========================================================================================
+// ManagerShield =============================================================================================
     
-    private ManagerTerritory managerTerritory;
+    private ManagerShield managerShield;
     
-    public ManagerTerritory getManagerTerritory(){
-        return managerTerritory;
+    public ManagerShield getManagerShield(){
+        return managerShield;
     }
     
-    public void resetManagerTerritory(){
-        managerTerritory.reset();
+    public void resetManagerShield(){
+        managerShield.reset();
     }
     
 // Main Methods ==============================================================================================
 
     @Override
     public boolean abstractConfirmAddAtoms(Player player, boolean explodeAdd){
-        if(getManagerTerritory().territoryNotOwned()){
-            getManagerTerritory().setTerritory(player);
+        if(getManagerShield().shieldNotOwned()){
+            getManagerShield().setShield(player);
             getManagerAtoms().replaceAll(player);
             return false;
-        }else if(!getManagerTerritory().territoryCheckOwner(player)){
+        }else if(!getManagerShield().shieldCheckOwner(player)){
             if(explodeAdd){
-                getManagerTerritory().incrementTerritoryDestroy();
-                if(getManagerTerritory().getTerritoryDestroy() >= SettingsCell.maxTerritoryHeath){
-                    getManagerTerritory().reset();
+                getManagerShield().incrementShieldDestroy();
+                if(getManagerShield().getShieldDestroy() >= SettingsCell.maxShieldHeath){
+                    getManagerShield().reset();
                     return false;
                 }
             }
@@ -56,42 +56,42 @@ public class CellTerritory extends Cell{
 
     @Override
     public boolean abstractValidateClickAddAtom(Player player){
-        return getManagerTerritory().territoryCheckOwner(player, Player.Dead);
+        return getManagerShield().shieldCheckOwner(player, Player.Dead);
     }
 
     @Override
     public void reset(){
         super.reset();
-        getManagerTerritory().reset();
+        getManagerShield().reset();
     }
     
 // Tickable ==================================================================================================
 
     @Override
     public boolean getExplodeReady(){
-        if(getManagerTerritory().territoryOwned()){
+        if(getManagerShield().shieldOwned()){
             return getManagerAtoms().atomsSize() >= this.getManagerAtoms().getMaxAtoms();
         }
         return false;
     }
 
-    private int tickBlinkTerritoryDecay = 0;
-    public boolean blinkTerritoryDecay = false;
+    private int tickBlinkShieldDecay = 0;
+    public boolean blinkShieldDecay = false;
     
     @Override
     protected void tickAnimations(){
         super.tickAnimations();
         
-        tickBlinkTerritoryDecay++;
-        if(blinkTerritoryDecay){
-            if(tickBlinkTerritoryDecay > 150){
-                tickBlinkTerritoryDecay = 0;
-                blinkTerritoryDecay = false;
+        tickBlinkShieldDecay++;
+        if(blinkShieldDecay){
+            if(tickBlinkShieldDecay > 150){
+                tickBlinkShieldDecay = 0;
+                blinkShieldDecay = false;
             }
         }else{
-            if(tickBlinkTerritoryDecay > 1000){
-                tickBlinkTerritoryDecay = 0;
-                blinkTerritoryDecay = true;
+            if(tickBlinkShieldDecay > 1000){
+                tickBlinkShieldDecay = 0;
+                blinkShieldDecay = true;
             }
         }
     }
@@ -100,16 +100,16 @@ public class CellTerritory extends Cell{
     public void tickTurn(){
         super.tickTurn();
         
-        Player territoryOwner = getManagerTerritory().getTerritory();
+        Player shieldOwner = getManagerShield().getShield();
         
-        if(territoryOwner != null && territoryOwner != Player.Dead && territoryOwner == HandlerPlayers.currentPlayer){
+        if(shieldOwner != null && shieldOwner != Player.Dead && shieldOwner == HandlerPlayers.currentPlayer){
             if(getManagerAtoms().isEmptyOrDead()){
-                getManagerTerritory().incrementDecay();
+                getManagerShield().incrementDecay();
             }else{
-                getManagerTerritory().resetTerritoryDecay();
+                getManagerShield().resetShieldDecay();
             }
-            if(getManagerTerritory().getTerritoryDecay() > 1 || territoryOwner.atoms == 0){
-                getManagerTerritory().reset();
+            if(getManagerShield().getShieldDecay() > 1 || shieldOwner.atoms == 0){
+                getManagerShield().reset();
             }
         }
     }
@@ -146,29 +146,29 @@ public class CellTerritory extends Cell{
     public void renderLayer4(Graphics2D g){
         super.renderLayer4(g);
         if(isCellSpace()) return;
-        drawTerritoryDesign(g);
+        drawShieldDesign(g);
     }
     
 // ...........................................................................................................
     
-    private void drawTerritoryDesign(Graphics2D g){
-        Player territory = getManagerTerritory().getTerritory();
-        if(territory != null){
+    private void drawShieldDesign(Graphics2D g){
+        Player shield = getManagerShield().getShield();
+        if(shield != null){
             if(focused && isInvalidMove()){
                 g.setColor(Color.red);
             }else{
-                if(HandlerPlayers.checkPlayer(getManagerTerritory().getTerritory()) && !focused){
+                if(HandlerPlayers.checkPlayer(getManagerShield().getShield()) && !focused){
                     if(getManagerAtoms().isEmptyOrDead()){
-                        if(blinkTerritoryDecay){
+                        if(blinkShieldDecay){
                             g.setColor(Color.red);
                         }else{
-                            g.setColor(territory.color);
+                            g.setColor(shield.color);
                         }
                     }else{
-                        g.setColor(territory.color);
+                        g.setColor(shield.color);
                     }
                 }else{
-                    g.setColor(territory.color);
+                    g.setColor(shield.color);
                 }
             }
             g.setStroke(new BasicStroke(2.0F));
@@ -187,7 +187,7 @@ public class CellTerritory extends Cell{
 
 // State =====================================================================================================
     
-    public Stack<StateTerritory> stateCellStack = new Stack<>();
+    public Stack<StateShield> stateCellStack = new Stack<>();
     
     @Override
     public void resetState(){
@@ -198,7 +198,7 @@ public class CellTerritory extends Cell{
     @Override
     public void saveState(){
         super.saveState();
-        this.stateCellStack.add(new StateTerritory(getManagerTerritory()));
+        this.stateCellStack.add(new StateShield(getManagerShield()));
         if(this.stateCellStack.size() > main.undoLimit){
             this.stateCellStack.remove(0);
         }
@@ -208,8 +208,8 @@ public class CellTerritory extends Cell{
     public void undoState(){
         super.undoState();
         if(stateCellStack.empty()) return;
-        StateTerritory sC = (StateTerritory) this.stateCellStack.pop();
-        this.getManagerTerritory().setStateCell(sC);
+        StateShield sC = (StateShield) this.stateCellStack.pop();
+        this.getManagerShield().setStateCell(sC);
     }
     
 }

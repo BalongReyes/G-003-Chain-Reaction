@@ -15,6 +15,6 @@ public class SettingsCell {
    public static Color cellMirrorColor = new Color(30, 30, 30);
    public static Color cellMirrorColorHighlight = new Color(90, 90, 90);
    
-   public static int maxTerritoryHeath = 1;
+   public static int maxShieldHeath = 1;
    
 }

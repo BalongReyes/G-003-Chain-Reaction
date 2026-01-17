@@ -80,7 +80,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     public void confirmAddAtoms(Player player, boolean explodeAdd){
         
-        if(isCellPart(TypeCellPart.territory)){
+        if(isCellPart(TypeCellPart.shield)){
             if(!abstractConfirmAddAtoms(player, explodeAdd)){
                 return;
             }
@@ -221,7 +221,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             }
         }
         
-        if(valid && isCellPart(TypeCellPart.territory)){
+        if(valid && isCellPart(TypeCellPart.shield)){
             if(!abstractValidateClickAddAtom(player)){
                 valid = false;
             }

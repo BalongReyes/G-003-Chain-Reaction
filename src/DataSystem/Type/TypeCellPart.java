@@ -13,7 +13,7 @@ import MainSystem.Object.CellType.CellSidePortal;
 import MainSystem.Object.CellType.CellSpace;
 import MainSystem.Object.CellType.CellSpecial;
 import MainSystem.Object.CellType.CellSpecialPortal;
-import MainSystem.Object.CellType.CellTerritory;
+import MainSystem.Object.CellType.CellShield;
 
 public enum TypeCellPart{
 
@@ -26,7 +26,7 @@ public enum TypeCellPart{
     teleport(),         // 6
     noEntry(),          // 7
     moveable(),         // 8
-    territory(),        // 9
+    shield(),           // 9
     mirror(),           // 10
     cannon(),           // 11
     cross();            // 12
@@ -69,8 +69,8 @@ public enum TypeCellPart{
             case moveable -> {
                 return new CellMoveable(x, y, rx, ry);
             }
-            case territory -> {
-                return new CellTerritory(x, y, rx, ry);
+            case shield -> {
+                return new CellShield(x, y, rx, ry);
             }
             case mirror -> {
                 return new CellMirror(x, y, rx, ry);

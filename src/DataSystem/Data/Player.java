@@ -51,10 +51,6 @@ public enum Player{
         if(this.atoms < 0) this.atoms = 0;
     }
 
-    public Atom createAtom(){
-        return new Atom(this);
-    }
-    
 // Static Methods ============================================================================================
     
     public static Player GetPlayer(int index){
