@@ -4,9 +4,16 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="Java">
             <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Main/Main.java</file>
-            <file>file:/D:/Java/G-003-Chain-Reaction/src/DataSystem/Data/Player.java</file>
-            <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Object/CellType/CellMoveable.java</file>
             <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Object/Cell.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Object/CellType/CellCannon.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/ManagerSystem/Handlers/HandlerObject/HandlerCell.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/ManagerSystem/Handlers/HandlerSystem/HandlerClick.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/ManagerSystem/Manager/ManagerCell/ManagerAtoms.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Object/CellType/CellMoveable.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Object/CellType/CellTeleport.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Object/CellType/CellDuplicator.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/DataSystem/Maps/Map15.java</file>
+            <file>file:/D:/Java/G-003-Chain-Reaction/src/MainSystem/Threads/ThreadProcess.java</file>
         </group>
     </open-files>
 </project-private>

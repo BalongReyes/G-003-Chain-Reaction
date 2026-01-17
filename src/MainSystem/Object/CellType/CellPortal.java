@@ -24,7 +24,7 @@ public class CellPortal extends Cell{
     @Override
     public void renderLayer1(Graphics2D g){
         super.renderLayer1(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawPortalLine(g);
     }  
     
@@ -35,7 +35,9 @@ public class CellPortal extends Cell{
             Cell c = this.getManagerSideCell().getSide(d);
             if(!c.isCellPart(TypeCellPart.portal) || d != IDDirection.U && d != IDDirection.L){
                 if(!main.isSimulating()){
-                    if(this.focused){
+                    if(main.isCellHideHint()){
+                        g.setColor(this.portalLineColor);
+                    }else if(this.focused){
                         g.setColor(!this.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
                     }else if(c.focused){
                         g.setColor(!c.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);

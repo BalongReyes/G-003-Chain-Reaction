@@ -9,7 +9,6 @@ import static MainSystem.Abstract.AbstractObject.main;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
-import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -46,12 +45,8 @@ public class CellMoveable extends Cell{
 // Clickable =================================================================================================
     
     @Override
-    public void clickRightPressed(){
-        if(!HandlerTick.pause && !rightPressed && cellPart != TypeCellPart.space){
-            if(!main.isSimulating() && validateClickAddAtom(HandlerPlayers.getPlayer())){
-                moveCell(true);
-            }
-        }
+    public void clickRightConfirmed(){
+        moveCell(true);
     }
     
     public boolean moveCell(boolean rightClicked){
@@ -65,16 +60,16 @@ public class CellMoveable extends Cell{
         
         switch(moveable){
             case 1 -> {
-                if(HandlerCell.getAllCell(this, IDDirection.D, 1).isCellPart(TypeCellPart.space)){
+                if(HandlerCell.getAllCell(this, IDDirection.D, 1).isCellSpace()){
                     d = IDDirection.D;
-                }else if(HandlerCell.getAllCell(this, IDDirection.U, 1).isCellPart(TypeCellPart.space)){
+                }else if(HandlerCell.getAllCell(this, IDDirection.U, 1).isCellSpace()){
                     d = IDDirection.U;
                 }
             }
             case 2 -> {
-                if(HandlerCell.getAllCell(this, IDDirection.L, 1).isCellPart(TypeCellPart.space)){
+                if(HandlerCell.getAllCell(this, IDDirection.L, 1).isCellSpace()){
                     d = IDDirection.L;
-                }else if(HandlerCell.getAllCell(this, IDDirection.R, 1).isCellPart(TypeCellPart.space)){
+                }else if(HandlerCell.getAllCell(this, IDDirection.R, 1).isCellSpace()){
                     d = IDDirection.R;
                 }
             }
@@ -103,7 +98,7 @@ public class CellMoveable extends Cell{
     @Override
     public void tick(){
         super.tick();
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         
         if(!isSimulatingPop()){
             tickMove();
@@ -230,7 +225,7 @@ public class CellMoveable extends Cell{
     @Override
     public void renderLayer1(Graphics2D g){
         super.renderLayer1(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 2 ---------------------------------------------------------------------------------------------------
@@ -238,7 +233,7 @@ public class CellMoveable extends Cell{
     @Override
     public void renderLayer2(Graphics2D g){
         super.renderLayer2(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
 
 // Layer 3 ---------------------------------------------------------------------------------------------------
@@ -246,7 +241,7 @@ public class CellMoveable extends Cell{
     @Override
     public void renderLayer3(Graphics2D g){
         super.renderLayer3(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 4 ---------------------------------------------------------------------------------------------------
@@ -254,7 +249,7 @@ public class CellMoveable extends Cell{
     @Override
     public void renderLayer4(Graphics2D g){
         super.renderLayer4(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawMoveableDesign(g);
     }
     
@@ -292,7 +287,7 @@ public class CellMoveable extends Cell{
     @Override
     public void renderLayer5(Graphics2D g){
         super.renderLayer5(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 }

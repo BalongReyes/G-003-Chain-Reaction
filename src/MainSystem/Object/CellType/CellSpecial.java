@@ -21,7 +21,7 @@ public class CellSpecial extends Cell{
     @Override
     public void renderLayer2(Graphics2D g){
         super.renderLayer2(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawDesign(g);
     }
     

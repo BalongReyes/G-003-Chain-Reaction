@@ -121,7 +121,7 @@ public class CellTerritory extends Cell{
     @Override
     public void renderLayer1(Graphics2D g){
         super.renderLayer1(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 2 ---------------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ public class CellTerritory extends Cell{
     @Override
     public void renderLayer2(Graphics2D g){
         super.renderLayer2(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 3 ---------------------------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ public class CellTerritory extends Cell{
     @Override
     public void renderLayer3(Graphics2D g){
         super.renderLayer3(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 4 ---------------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ public class CellTerritory extends Cell{
     @Override
     public void renderLayer4(Graphics2D g){
         super.renderLayer4(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawTerritoryDesign(g);
     }
     
@@ -182,7 +182,7 @@ public class CellTerritory extends Cell{
     @Override
     public void renderLayer5(Graphics2D g){
         super.renderLayer5(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
 
 // State =====================================================================================================

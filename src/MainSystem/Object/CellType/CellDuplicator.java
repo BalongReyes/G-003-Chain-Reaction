@@ -150,7 +150,7 @@ public class CellDuplicator extends Cell {
     @Override
     public void renderLayer2(Graphics2D g) {
         super.renderLayer2(g);
-        if (isCellPart(TypeCellPart.space)) {
+        if (isCellSpace()) {
             return;
         }
         drawDesign(g);
@@ -181,19 +181,19 @@ public class CellDuplicator extends Cell {
     @Override
     public void renderLayer5(Graphics2D g){
         super.renderLayer5(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
 
 // ...........................................................................................................
     
     @Override
-    protected void drawCellBorderFocused(Graphics2D g){
+    public void drawCellBorderFocused(Graphics2D g){
         super.drawCellBorderFocused(g);
         
-        if(isCellPart(TypeCellPart.duplicator)){
-            for(Cell c : getManagerDuplicator().getDuplicatorCells()){
-                c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
-            }
+        for(Cell c : getManagerDuplicator().getDuplicatorCells()){
+            if(c.drawBorder != null) continue;
+            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
+            c.drawCellBorderFocused(g);
         }
     }
     

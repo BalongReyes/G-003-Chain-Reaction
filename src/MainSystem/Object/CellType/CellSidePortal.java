@@ -25,7 +25,7 @@ public class CellSidePortal extends Cell{
     @Override
     public void renderLayer2(Graphics2D g){
         super.renderLayer2(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawSidePortal(g);
     }
     

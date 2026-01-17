@@ -38,7 +38,7 @@ public class CellNoEntry extends Cell{
     @Override
     public void renderLayer4(Graphics2D g){
         super.renderLayer4(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawNoEntryDesign(g);
     }
     

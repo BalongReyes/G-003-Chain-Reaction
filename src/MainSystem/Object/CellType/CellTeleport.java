@@ -103,7 +103,7 @@ public class CellTeleport extends Cell{
     @Override
     public void renderLayer1(Graphics2D g){
         super.renderLayer1(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 2 ---------------------------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ public class CellTeleport extends Cell{
     @Override
     public void renderLayer2(Graphics2D g){
         super.renderLayer2(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawDesign(g);
     }
     
@@ -156,7 +156,7 @@ public class CellTeleport extends Cell{
     @Override
     public void renderLayer3(Graphics2D g){
         super.renderLayer3(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 4 ---------------------------------------------------------------------------------------------------
@@ -164,7 +164,7 @@ public class CellTeleport extends Cell{
     @Override
     public void renderLayer4(Graphics2D g){
         super.renderLayer4(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
     
 // Layer 5 ---------------------------------------------------------------------------------------------------
@@ -172,13 +172,13 @@ public class CellTeleport extends Cell{
     @Override
     public void renderLayer5(Graphics2D g){
         super.renderLayer5(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
     }
 
 // ...........................................................................................................
     
     @Override
-    protected void drawCellBorderFocused(Graphics2D g){
+    public void drawCellBorderFocused(Graphics2D g){
         super.drawCellBorderFocused(g);
         
         if(isCellPart(TypeCellPart.teleport)){

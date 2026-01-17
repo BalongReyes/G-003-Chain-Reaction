@@ -24,9 +24,12 @@ public class MouseListener implements java.awt.event.MouseListener{
 
     @Override
     public void mouseReleased(MouseEvent e){
+        int x = e.getX();
+        int y = e.getY();
+        Point p = new Point(x, y);
         switch(e.getButton()){
-            case 1 -> HandlerClick.clickLeftReleased();
-            case 3 -> HandlerClick.clickRightReleased();
+            case 1 -> HandlerClick.clickLeftReleased(p);
+            case 3 -> HandlerClick.clickRightReleased(p);
         }
     }
 

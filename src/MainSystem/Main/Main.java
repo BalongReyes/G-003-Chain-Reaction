@@ -1,6 +1,7 @@
 
 package MainSystem.Main;
 
+import DataSystem.Data.Phase;
 import DataSystem.Data.Player;
 import DataSystem.Maps.AbstractMap;
 import DataSystem.Maps.*;
@@ -38,7 +39,7 @@ public class Main{
     public int totalSize;
     public Dimension canvasSize;
     
-    public AbstractMap map = new Map14();
+    public AbstractMap map = new Map15();
     
 // Constructor ===============================================================================================
     
@@ -104,18 +105,22 @@ public class Main{
     
     public void tick(){
         
+        cellFocused = null;
+        cellHideHint = false;
         for(Cell c : HandlerCell.getArray()){
-            cellFocused = false;
             if(c.focused){
-                cellFocused = true;
-                break;
+                cellFocused = c;
             }
+            if(c.cellHideHint){
+                cellHideHint = true;
+            }
+            if(c.focused || c.cellHideHint) break;
         }
         
         tickSimulateReaction();
         HandlerPlayers.tick();
         
-        if(cellFocused){
+        if(cellFocused != null){
             if(!cursorHand){
                 window.setCursor(12);
                 cursorHand = true;
@@ -128,22 +133,45 @@ public class Main{
     
 // -----------------------------------------------------------------------------------------------------------
 
-    public boolean cellFocused;
+    public Cell cellFocused;
     
     public boolean isCellFocused(){
+        return cellFocused != null;
+    }
+    
+    public Cell getCellFocused(){
         return cellFocused;
+    }
+    
+    public boolean cellHideHint = false;
+    
+    public boolean isCellHideHint(){
+        return cellHideHint;
     }
     
 // -----------------------------------------------------------------------------------------------------------
     
     private boolean simulateReaction = false;
-    private int simulatePhase = 1;
+    private boolean simulateAdd = false;
+    private Phase simulatePhase = Phase.Pop;
     
     public boolean isSimulating(){
         return simulateReaction;
     }
     
+    public String getSimulatePhase(){
+        return simulatePhase.name();
+    }
+    
     public void tickSimulateReaction(){
+        for(Cell c : HandlerCell.getArray()){
+            if(c.isSimulateAdd()){
+                simulateAdd = true;
+                return;
+            }
+        }
+        simulateAdd = false;
+        
         if(!simulateReaction){
             for(Cell c : HandlerCell.getArray()) if(c.pop){
                 simulateReaction = true;
@@ -153,21 +181,21 @@ public class Main{
         }
         
         switch(simulatePhase){
-            case 1 -> {
+            case Pop -> {
                 // Pop first
                 boolean repeatSimulate = false;
                 for(Cell c : HandlerCell.getArray()){
                     if(c.pop){
                         c.setSimulatePop();
                         repeatSimulate = true;
-                        simulatePhase = 2;
+                        simulatePhase = Phase.AddAtoms;
                     }
                 }
                 if(!repeatSimulate){
                     simulateReaction = false;
                 }
             }
-            case 2 -> {
+            case AddAtoms -> {
                 // Add atoms
                 for(Cell c : HandlerCell.getArray()){
                     if(c.isSimulatingPop()) return;
@@ -175,9 +203,9 @@ public class Main{
                 for(Cell c : HandlerCell.getArray()){
                     c.processFutureAtoms();
                 }
-                simulatePhase = 3;
+                simulatePhase = Phase.MoveMoveable;
             }
-            case 3 -> {
+            case MoveMoveable -> {
                 // Move moveable
                 boolean repeat = false;
                 do{
@@ -190,9 +218,9 @@ public class Main{
                         }
                     }
                 }while(repeat);
-                simulatePhase = 4;
+                simulatePhase = Phase.MoveRead;
             }
-            case 4 -> {
+            case MoveRead -> {
                 // Move ready
                 for(CellMoveable c : HandlerCell.getCellMoveableArray()){
                     if(c.isSimualteMove()) return;
@@ -200,7 +228,7 @@ public class Main{
                 for(Cell c : HandlerCell.getArray()){
                     c.processFutureMoveReady();
                 }
-                simulatePhase = 1;
+                simulatePhase = Phase.Pop;
             }
         }
     }

@@ -153,7 +153,7 @@ public class HandlerCell{
     public static Cell getCell(int rx, int ry){
         if(rx != -1 && rx != SettingsCell.xCell && ry != -1 && ry != SettingsCell.yCell){
             for(Cell c : getArray()){
-                if(c.rx == rx && c.ry == ry && !c.isCellPart(TypeCellPart.space)){
+                if(c.rx == rx && c.ry == ry && !c.isCellSpace()){
                     return c;
                 }
             }

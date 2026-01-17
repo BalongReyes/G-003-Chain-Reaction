@@ -102,7 +102,9 @@ public class ThreadProcess implements Runnable{
                 HandlerRender.render(g2);
                 main.window.jLabel1.setText("FPS: " + fps +
                     (main.isSimulating() ? "   (Simulating)" : "") + 
-                    (main.isCellFocused()? "   (Focused)" : "") + 
+                    (main.isSimulating() ? "   (" + main.getSimulatePhase() + ")" : "") + 
+                    (main.isCellFocused() ? "   (Focused)" : "") + 
+                    (main.isCellHideHint() ? "   (Hide Hint)" : "") + 
                     (HandlerPlayers.getPlayerMoves() > 0 ? "   (PlayerMoves: " + HandlerPlayers.getPlayerMoves() + ")" : "") +
                     (KeyListener.shift ? "   (Shift)" : "") + (HandlerTick.pause ? "   (Paused)" : "") +
                     (SettingsSystem.ticks != 1000 ? "   (Tick: " + SettingsSystem.ticks + ")" : "") +

@@ -29,7 +29,7 @@ public class CellSpecialPortal extends Cell{
     @Override
     protected void tickAnimations(){
         super.tickAnimations();
-        if(focused || sideFocused != null){
+        if((focused || sideFocused != null) && !main.isCellHideHint()){
             animationTick1++;
             if(animationTick1 > 25){
                 animationTick1 = 0;
@@ -62,7 +62,7 @@ public class CellSpecialPortal extends Cell{
     @Override
     public void renderLayer1(Graphics2D g){
         super.renderLayer1(g);
-        if(isCellPart(TypeCellPart.space)) return;
+        if(isCellSpace()) return;
         drawSpecialPortalLine(g);
     }
     
@@ -84,7 +84,7 @@ public class CellSpecialPortal extends Cell{
             Cell c = this.getManagerSideCell().getSide(d);
             if((!c.isCellPart(TypeCellPart.specialPortal) || d != IDDirection.U && d != IDDirection.L) && !c.isCellPart(TypeCellPart.portal)){
                 
-                if(!main.isSimulating() && (this.focused || c.focused)){
+                if(!main.isSimulating() && (this.focused || c.focused) && !main.isCellHideHint()){
                     if(this.focused){
                         g.setColor(!this.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
                     }else if(c.focused){

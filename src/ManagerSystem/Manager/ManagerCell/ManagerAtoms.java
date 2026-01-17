@@ -76,8 +76,9 @@ public class ManagerAtoms{
     public void updateMaxAtoms(TypeCellPart cellPart, ManagerSideCell managerSideCell){
         this.maxAtoms = 0;
         if(cellPart != TypeCellPart.space) switch(cellPart){
-            case special ->
+            case special -> {
                 setMaxAtoms(1);
+            }
             case duplicator -> {
                 setMaxAtoms(4);
             }
@@ -87,7 +88,7 @@ public class ManagerAtoms{
                         if(!managerSideCell.haveV() && !managerSideCell.haveH()){
                             setMaxAtoms(1);
                         }else{
-                            setMaxAtoms(1);
+                            setMaxAtoms(2);
                         }
                     }
                     case 3 -> {
@@ -163,6 +164,9 @@ public class ManagerAtoms{
     public void add(Player player){
         atoms.add(player);
         player.incrementAtoms();
+        
+        parent.atomsDistance = 0;
+        parent.setSimulateAdd(true);
         
         boolean exist = false;
         for(Player a : getDifferentAtoms()){

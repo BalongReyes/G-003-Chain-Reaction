@@ -148,27 +148,16 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
     }
 
     @Override
-    public boolean isLeftPressed(){
-        return this.leftPressed;
-    }
-
-    @Override
     public void clickRightPressed(){
         if(!this.rightPressed){
             player.hintEnabled = !player.hintEnabled;
         }
-        
         this.rightPressed = true;
     }
 
     @Override
     public void clickRightReleased(){
         this.rightPressed = false;
-    }
-
-    @Override
-    public boolean isRightPressed(){
-        return this.rightPressed;
     }
 
     @Override
