@@ -10,6 +10,9 @@ import DataSystem.Interface.Clickable;
 import DataSystem.Interface.Renderable;
 import DataSystem.Interface.Tickable;
 import DataSystem.Type.TypeCellPart;
+import static DataSystem.Type.TypeCellPart.cannon;
+import static DataSystem.Type.TypeCellPart.moveable;
+import static DataSystem.Type.TypeCellPart.specialPortal;
 import MainSystem.Abstract.AbstractObject;
 import MainSystem.Methods.MethodsNumber;
 import MainSystem.Object.CellType.CellCannon;
@@ -567,43 +570,41 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     private void tickCheckFocus(){
         if(HandlerTick.cursorLocation != null && getClickableBounds().contains(HandlerTick.cursorLocation)){
-            if(!focused){
-                if(cellLeftPressed != null && (cellLeftPressed.isCellPart(TypeCellPart.cannon) || cellLeftPressed.isCellPart(TypeCellPart.moveable))){
-                    setFocused(true, cellLeftPressed != this);
-                }else{
-                    setFocused(!isCellSpace(), false);
+            if(!cellHideHint && cellLeftPressed != null){
+                if(cellLeftPressed != this && switch(cellLeftPressed.getCellPart()){
+                    case cannon -> true;
+                    case moveable -> true;
+                    default -> false;
+                }){
+                    setCellHideHint(true);
                 }
             }else if(cellHideHint && cellLeftPressed == null){
-                setFocused(focused, false);
+                setCellHideHint(false);
             }
-        }else if(focused){
-            setFocused(false);
+            if(!focused && !isCellSpace()){
+                setFocused(true);
+            }
+        }else{
+            if(focused){
+                setFocused(false);
+            }
+            if(cellHideHint){
+                setCellHideHint(false);
+            }
         }
-
-        if(cellLeftPressed == null && focused && isCellSpace()){
-            setFocused(false);
-        }
+    }
+    
+    protected void setCellHideHint(boolean cellHideHint){
+        this.cellHideHint = cellHideHint;
     }
     
     protected void setFocused(boolean focus){
-        setFocused(focus, false);
-    }
-    
-    protected void setFocused(boolean focus, boolean cellHideHint){
         focused = focus;
-        if(cellHideHint){
-            if(cellLeftPressed.isCellPart(TypeCellPart.cannon) || cellLeftPressed.isCellPart(TypeCellPart.moveable)){
-                this.cellHideHint = cellHideHint;
-            }
-        }else{
-            this.cellHideHint = cellHideHint;
-        }
         
         if(!focus){
             for(Cell c : managerSideCell.getArray()) if(c != null) c.sideFocused = null;
             highlightXcoord = false;
             highlightYcoord = false;
-            cellHideHint = false;
         }else{
             for(IDDirection d : IDDirection.values()) if(managerSideCell.haveSide(d)){
                 Cell c = managerSideCell.getSide(d);
@@ -701,10 +702,13 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             Cell c = this.getManagerSideCell().getSide(d);
             if(c == null) continue;
             
-            if(
-                c.isCellPart(TypeCellPart.portal) || c.isCellPart(TypeCellPart.specialPortal) ||
-                isCellPart(TypeCellPart.portal) || isCellPart(TypeCellPart.specialPortal)
-            ){
+            if(switch(c.getCellPart()){
+                case portal, specialPortal -> true;
+                default -> false;
+            } && switch(getCellPart()){
+                case portal, specialPortal -> true;
+                default -> false;
+            }){
                 drawPortalDesignColor(g, d);
                 switch(d){
                     case U -> {
@@ -966,27 +970,39 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         g.setColor(this.explodeColor);
 
         double animation = 1 - this.explodeAnimation;
-        int aRD, aR;
+        
+        for(IDDirection d : IDDirection.values()){
+            Cell c = getManagerSideCell().getSide(d);
+            if(c == null) continue;
+            
+            int tRx = c.rx - this.rx;
+            int tRy = c.ry - this.ry;
+            int aRx, aRy;
 
-        if(this.getManagerSideCell().haveU()){
-            aRD = this.ry - this.getManagerSideCell().getSide(IDDirection.U).ry;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf), getY(drawExplodeHalf - aR), atomSize);
-        }
-        if(this.getManagerSideCell().haveD()){
-            aRD = this.getManagerSideCell().getSide(IDDirection.D).ry - this.ry;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf), getY(drawExplodeHalf + aR), atomSize);
-        }
-        if(this.getManagerSideCell().haveL()){
-            aRD = this.rx - this.getManagerSideCell().getSide(IDDirection.L).rx;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf - aR), getY(drawExplodeHalf), atomSize);
-        }
-        if(this.getManagerSideCell().haveR()){
-            aRD = this.getManagerSideCell().getSide(IDDirection.R).rx - this.rx;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf + aR), getY(drawExplodeHalf), atomSize);
+            if(tRx < 0){
+                if(tRy < 0){
+                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
+                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
+                    gEllipse(g, getX(drawExplodeHalf + aRx), getY(drawExplodeHalf + aRy), atomSize);
+                }else{
+                    tRy *= -1;
+                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
+                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
+                    gEllipse(g, getX(drawExplodeHalf + aRx), getY(drawExplodeHalf - aRy), atomSize);
+                }
+            }else{
+                tRx *= -1;
+                if(tRy < 0){
+                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
+                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
+                    gEllipse(g, getX(drawExplodeHalf - aRx), getY(drawExplodeHalf + aRy), atomSize);
+                }else{
+                    tRy *= -1;
+                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
+                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
+                    gEllipse(g, getX(drawExplodeHalf - aRx), getY(drawExplodeHalf - aRy), atomSize);
+                }
+            }
         }
     }
     
