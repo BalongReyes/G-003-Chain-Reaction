@@ -27,10 +27,10 @@ public class CellCannon extends Cell{
     public void confirmCannonTarget(Cell tC){
         if(!getManagerAtoms().isMaxAtoms() || getManagerAtoms().isEmptyOrDead() || !tC.isCellPart(TypeCellPart.cannon)) return;
         
-        main.saveStates();
+        main.saveState();
         CannonTarget = tC;
-        setPop(HandlerPlayers.getPlayer());
-        HandlerPlayers.nextPlayer();
+        setPop(main.handlerPlayers.getPlayer());
+        main.handlerPlayers.nextPlayer();
     }
     
 // Tickable ==================================================================================================
@@ -89,7 +89,7 @@ public class CellCannon extends Cell{
         
         if(!main.isSimulating()){
             if(cellLeftPressed != null && cellLeftPressed == this){
-                g.setColor(HandlerPlayers.getPlayerColor());
+                g.setColor(main.handlerPlayers.getPlayerColor());
             }else if(focused){
                 if(cellLeftPressed != null){
                     g.setColor(Color.lightGray);

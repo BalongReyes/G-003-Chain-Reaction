@@ -1,4 +1,3 @@
-
 package ManagerSystem.Listeners;
 
 import MainSystem.Main.Main;
@@ -10,7 +9,11 @@ import java.awt.event.KeyEvent;
 
 public class KeyListener extends KeyAdapter{
 
-    public static Main main;
+    private final Main main;
+
+    public KeyListener(Main main) {
+        this.main = main;
+    }
     public static boolean shift = false;
 
     @Override
@@ -21,18 +24,18 @@ public class KeyListener extends KeyAdapter{
                 shift = true;
             }
             case KeyEvent.VK_SPACE -> {
-                HandlerTick.pause = !HandlerTick.pause;
+                main.handlerTick.pause = !main.handlerTick.pause;
             }
             case KeyEvent.VK_F1 -> {
-                HandlerPlayers.nextPlayer();
+                main.handlerPlayers.nextPlayer();
             }
             case KeyEvent.VK_F2 -> {
-                HandlerPlayers.nextPlayerForced();
+                main.handlerPlayers.nextPlayerForced();
             }
             case KeyEvent.VK_F3 -> {
-                HandlerRender.showRenderLayer++;
-                if(HandlerRender.showRenderLayer > 6){
-                    HandlerRender.showRenderLayer = 0;
+                main.handlerRender.showRenderLayer++;
+                if(main.handlerRender.showRenderLayer > 6){
+                    main.handlerRender.showRenderLayer = 0;
                 }
             }
             case KeyEvent.VK_F4 -> {
@@ -49,7 +52,7 @@ public class KeyListener extends KeyAdapter{
         if(e.isControlDown()) { 
             switch(key){
                 case KeyEvent.VK_Z -> {
-                    main.undoStates();
+                    main.undoState();
                 }
             }
         }

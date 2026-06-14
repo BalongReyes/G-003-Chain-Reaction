@@ -16,6 +16,7 @@ import MainSystem.Threads.ThreadProcess;
 import ManagerSystem.Handlers.HandlerObjects;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
+import ManagerSystem.Handlers.HandlerSystem.HandlerClick;
 import ManagerSystem.Handlers.HandlerSystem.HandlerRender;
 import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
 import ManagerSystem.Listeners.KeyListener;
@@ -41,24 +42,28 @@ public class Main{
     
     public AbstractMap map = new Map16();
     
+    public final HandlerRender handlerRender = new HandlerRender();
+    public final HandlerTick handlerTick = new HandlerTick();
+    public final HandlerCell handlerCell = new HandlerCell();
+    public final HandlerPlayers handlerPlayers = new HandlerPlayers();
+    public final HandlerObjects handlerObjects = new HandlerObjects();
+    public final HandlerClick handlerClick = new HandlerClick();
+    
 // Constructor ===============================================================================================
     
     public static void main(String[] args){
         Main main = new Main();
         
-        Player.main = main;
+
         
-        KeyListener.main = main;
-        Console.main = main;
+
+
         PlayerIndicate.main = main;
-        Window.main = main;
+
         
-        HandlerRender.main = main;
-        HandlerTick.main = main;
-        HandlerCell.main = main;
-        HandlerPlayers.main = main;
         
-        ThreadProcess.main = main;
+        
+
         
         main.init();
     }
@@ -72,7 +77,7 @@ public class Main{
 // Constructor's Methods =====================================================================================
 
     private void setWindow(){
-        window = new Window(canvasSize, 1);
+        window = new Window(this, canvasSize, 1);
     }
     
 // -----------------------------------------------------------------------------------------------------------
@@ -84,17 +89,18 @@ public class Main{
             int[] mapSize = map.getMapSize();
             SettingsCell.xCell = mapSize[0];
             SettingsCell.yCell = mapSize[1];
+            handlerCell.updateGridSize();
         }
         
         totalSize = 40 + gapSize;
         canvasSize = new Dimension(SettingsCell.xCell * this.totalSize + this.gapSize + this.borderSize * 2 + 150, SettingsCell.yCell * this.totalSize + this.gapSize + this.borderSize * 2 + 50);
         
         this.setMap();
-        HandlerCell.updateCells();
+        handlerCell.updateCells(this);
         
         int y = 50;
         for(Player dP : Player.values()) if(dP != Player.Dead){
-            HandlerObjects.add(new PlayerIndicate((double)(canvasSize.width - 110), (double)y, dP));
+            handlerObjects.add(new PlayerIndicate((double)(canvasSize.width - 110), (double)y, dP), this);
             y += 50;
         }
     }
@@ -107,7 +113,7 @@ public class Main{
         
         cellFocused = null;
         cellHideHint = false;
-        for(Cell c : HandlerCell.getArray()){
+        for(Cell c : handlerCell.getArray()){
             if(c.focused){
                 cellFocused = c;
             }
@@ -118,7 +124,7 @@ public class Main{
         }
         
         tickSimulateReaction();
-        HandlerPlayers.tick();
+        handlerPlayers.tick(this);
         
         if(cellFocused != null){
             if(!cursorHand){
@@ -168,7 +174,7 @@ public class Main{
     }
     
     public void tickSimulateReaction(){
-        for(Cell c : HandlerCell.getArray()){
+        for(Cell c : handlerCell.getArray()){
             if(c.isSimulateAdd()){
                 simulateAdd = true;
                 return;
@@ -177,7 +183,7 @@ public class Main{
         simulateAdd = false;
         
         if(!simulateReaction){
-            for(Cell c : HandlerCell.getArray()) if(c.pop){
+            for(Cell c : handlerCell.getArray()) if(c.pop){
                 simulateReaction = true;
                 break;
             }
@@ -188,7 +194,7 @@ public class Main{
             case Pop -> {
                 // Pop first
                 boolean repeatSimulate = false;
-                for(Cell c : HandlerCell.getArray()){
+                for(Cell c : handlerCell.getArray()){
                     if(c.pop){
                         c.setSimulatePop();
                         repeatSimulate = true;
@@ -201,10 +207,10 @@ public class Main{
             }
             case AddAtoms -> {
                 // Add atoms
-                for(Cell c : HandlerCell.getArray()){
+                for(Cell c : handlerCell.getArray()){
                     if(c.isSimulatingPop()) return;
                 }
-                for(Cell c : HandlerCell.getArray()){
+                for(Cell c : handlerCell.getArray()){
                     c.processFutureAtoms();
                 }
                 setSimulatePhase(Phase.MoveMoveable);
@@ -214,7 +220,7 @@ public class Main{
                 boolean repeat = false;
                 do{
                     repeat = false;
-                    for(Cell c : HandlerCell.getArray()){
+                    for(Cell c : handlerCell.getArray()){
                         if(!repeat){
                             repeat = c.processFutureMove();
                         }else{
@@ -226,10 +232,10 @@ public class Main{
             }
             case MoveRead -> {
                 // Move ready
-                for(CellMoveable c : HandlerCell.getCellMoveableArray()){
+                for(CellMoveable c : handlerCell.getCellMoveableArray()){
                     if(c.isSimualteMove()) return;
                 }
-                for(Cell c : HandlerCell.getArray()){
+                for(Cell c : handlerCell.getArray()){
                     c.processFutureMoveReady();
                 }
                 setSimulatePhase(Phase.Pop);
@@ -242,7 +248,7 @@ public class Main{
     private int[] turnHintBorder = new int[]{0, 0, 0, 0};
     
     public void preRender(Graphics2D g){
-        g.setColor(HandlerPlayers.getPlayerColor());
+        g.setColor(handlerPlayers.getPlayerColor());
         g.setStroke(new BasicStroke(2.0F));
         g.drawRect(turnHintBorder[0], turnHintBorder[1], turnHintBorder[2], turnHintBorder[3]);
         g.setStroke(new BasicStroke(1.0F));
@@ -312,7 +318,7 @@ public class Main{
                         if(y == 0){
                             c.drawXcoord = true;
                         }
-                        HandlerObjects.add(c);
+                        handlerObjects.add(c, this);
                     }
                 }
             }
@@ -327,9 +333,9 @@ public class Main{
     }
     
     public void reset(){
-        HandlerCell.Reset();
-        HandlerCell.updateCells();
-        HandlerPlayers.Reset();
+        handlerCell.Reset();
+        handlerCell.updateCells(this);
+        handlerPlayers.Reset();
         
         Player.Reset();
         
@@ -346,7 +352,7 @@ public class Main{
         Console.out("\nStarting Threads", "\u001b[0;32m");
         if(!this.running){
             this.running = true;
-            this.tProcess = new ThreadProcess();
+            this.tProcess = new ThreadProcess(this);
             this.tProcess.start();
         }else{
             Console.out("Threads Already Started", "\u001b[0;31m");
@@ -364,20 +370,20 @@ public class Main{
 // State =====================================================================================================
     
     public void resetState(){
-        HandlerCell.ResetState();
-        HandlerPlayers.ResetState();
+        handlerCell.ResetState();
+        handlerPlayers.ResetState();
     }
     
-    public void saveStates(){
-        HandlerCell.SaveState();
-        HandlerPlayers.SaveStates();
+    public void saveState(){
+        handlerCell.SaveState();
+        handlerPlayers.SaveStates(undoLimit);
     }
     
-    public void undoStates(){
-        if(HandlerTick.pause || isSimulating()) return;
+    public void undoState(){
+        if(handlerTick.pause || isSimulating()) return;
         
-        HandlerCell.UndoState();
-        HandlerPlayers.UndoStates();
+        handlerCell.UndoState();
+        handlerPlayers.UndoStates();
     }
     
 }

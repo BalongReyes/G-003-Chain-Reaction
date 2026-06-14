@@ -1,6 +1,7 @@
 package ManagerSystem.Handlers;
 
 import MainSystem.Abstract.AbstractObject;
+import MainSystem.Main.Main;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerSystem.HandlerClick;
 import ManagerSystem.Handlers.HandlerSystem.HandlerRender;
@@ -9,36 +10,45 @@ import java.util.ArrayList;
 
 public class HandlerObjects{
 
-    public static ArrayList<AbstractObject> objects = new ArrayList();
+    private final java.util.List<AbstractObject> objects = new ArrayList<>();
+    private AbstractObject[] objectsCache = new AbstractObject[0];
+    private boolean dirty = false;
 
-    public static void add(AbstractObject o){
+    public void add(AbstractObject o, Main main){
         if(o != null){
             objects.add(o);
-            HandlerTick.add(o);
-            HandlerRender.add(o);
-            HandlerClick.add(o);
-            HandlerCell.add(o);
+            dirty = true;
+            main.handlerTick.add(o);
+            main.handlerRender.add(o);
+            main.handlerClick.add(o);
+            main.handlerCell.add(o);
         }
     }
 
-    public static void remove(AbstractObject o){
+    public void remove(AbstractObject o, Main main){
         if(o != null){
             objects.remove(o);
-            HandlerTick.remove(o);
-            HandlerRender.remove(o);
-            HandlerClick.remove(o);
-            HandlerCell.remove(o);
+            dirty = true;
+            main.handlerTick.remove(o);
+            main.handlerRender.remove(o);
+            main.handlerClick.remove(o);
+            main.handlerCell.remove(o);
         }
     }
 
-    public static AbstractObject[] getArray(){
-        return objects.toArray(AbstractObject[]::new);
+    public AbstractObject[] getArray(){
+        if(dirty){
+            objectsCache = objects.toArray(AbstractObject[]::new);
+            dirty = false;
+        }
+        return objectsCache;
     }
 
-    public static void RemoveAll(){
-        for(AbstractObject o : objects){
-            remove(o);
+    public void RemoveAll(Main main){
+        for(AbstractObject o : getArray()){
+            remove(o, main);
         }
         objects.clear();
+        dirty = true;
     }
 }

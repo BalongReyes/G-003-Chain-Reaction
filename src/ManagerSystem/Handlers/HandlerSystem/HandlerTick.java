@@ -8,46 +8,54 @@ import java.util.ArrayList;
 
 public class HandlerTick{
 
-    public static Main main;
+    private final java.util.List<Tickable> tickable = new ArrayList<>();
+    private Tickable[] tickableCache = new Tickable[0];
+    private boolean dirty = false;
     
-    public static ArrayList<Tickable> tickable = new ArrayList();
-    public static boolean pause = false;
-    public static Point cursorLocation;
+    public boolean pause = false;
+    public Point cursorLocation;
 
-    public static void add(AbstractObject o){
+    public void add(AbstractObject o){
         if(o instanceof Tickable t){
             tickable.add(t);
+            dirty = true;
         }
     }
 
-    public static void remove(AbstractObject o){
+    public void remove(AbstractObject o){
         if(o instanceof Tickable t){
             tickable.remove(t);
+            dirty = true;
         }
     }
 
-    public static void set(AbstractObject oldO, AbstractObject newO){
+    public void set(AbstractObject oldO, AbstractObject newO){
         if(oldO instanceof Tickable oldT){
             if(newO instanceof Tickable newT){
                 tickable.set(tickable.indexOf(oldT), newT);
+                dirty = true;
             }
         }
     }
 
-    public static boolean check(AbstractObject o){
+    public boolean check(AbstractObject o){
         return o instanceof Tickable;
     }
 
-    public static Tickable[] getArray(){
-        return tickable.toArray(Tickable[]::new);
+    public Tickable[] getArray(){
+        if(dirty){
+            tickableCache = tickable.toArray(Tickable[]::new);
+            dirty = false;
+        }
+        return tickableCache;
     }
 
-    public static void tick(){
+    public void tick(Main main){
         if(!pause){
             cursorLocation = main.window.getMouseLocation();
-            tickable.forEach((t) -> {
+            for(Tickable t : getArray()){
                 t.tick();
-            });
+            }
             main.tick();
         }
     }

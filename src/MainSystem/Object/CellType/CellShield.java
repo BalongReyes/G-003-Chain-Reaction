@@ -105,7 +105,7 @@ public class CellShield extends Cell{
         
         Player shieldOwner = getManagerShield().getShield();
         
-        if(shieldOwner != null && shieldOwner != Player.Dead && shieldOwner == HandlerPlayers.currentPlayer){
+        if(shieldOwner != null && shieldOwner != Player.Dead && shieldOwner == main.handlerPlayers.currentPlayer){
             if(getManagerAtoms().isEmptyOrDead()){
                 getManagerShield().incrementDecay();
             }else{
@@ -165,7 +165,7 @@ public class CellShield extends Cell{
                 overlayColor = Color.red;
                 g.setColor(Color.red);
             }else{
-                if(HandlerPlayers.checkPlayer(getManagerShield().getShield()) && !focused){
+                if(main.handlerPlayers.checkPlayer(getManagerShield().getShield()) && !focused){
                     if(getManagerAtoms().isEmptyOrDead()){
                         if(blinkShieldDecay){
                             overlayColor = Color.red;

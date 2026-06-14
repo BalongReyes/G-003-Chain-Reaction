@@ -2,7 +2,7 @@ package MainSystem.Main;
 
 public class Console{
 
-    public static Main main;
+
     public static final String RESET = "\u001b[0m";
     public static final String BLACK = "\u001b[0;30m";
     public static final String RED = "\u001b[0;31m";

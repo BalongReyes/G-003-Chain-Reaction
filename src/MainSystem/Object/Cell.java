@@ -348,7 +348,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 // -----------------------------------------------------------------------------------------------------------
     
     public boolean isInvalidMove(){
-        return !validateClickAddAtom(HandlerPlayers.getPlayer());
+        return !validateClickAddAtom(main.handlerPlayers.getPlayer());
     }
     
 // Abstract Methods ==========================================================================================
@@ -395,11 +395,11 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     @Override
     public void clickLeftPressed(){
-        if(isCellSpace() || HandlerTick.pause || HandlerClick.leftPressed || main.isSimulating()) return;
+        if(isCellSpace() || main.handlerTick.pause || main.handlerClick.leftPressed || main.isSimulating()) return;
         
-        if(validateClickAddAtom(HandlerPlayers.getPlayer())){
+        if(validateClickAddAtom(main.handlerPlayers.getPlayer())){
             cellLeftPressed = this;
-            HandlerClick.leftPressed = true;
+            main.handlerClick.leftPressed = true;
         }
     }
 
@@ -417,12 +417,12 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     }
     
     public void clickLeftConfirmed(){
-        main.saveStates();
-        confirmAddAtoms(HandlerPlayers.getPlayer(), false);
+        main.saveState();
+        confirmAddAtoms(main.handlerPlayers.getPlayer(), false);
         if(isCellPart(TypeCellPart.moveable) && pop){
             ((CellMoveable)this).futureMove = true;
         }
-        HandlerPlayers.nextPlayer();
+        main.handlerPlayers.nextPlayer();
     }
     
 // -----------------------------------------------------------------------------------------------------------
@@ -431,11 +431,11 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 
     @Override
     public void clickRightPressed(){
-        if(isCellSpace() || HandlerTick.pause || HandlerClick.rightPressed || main.isSimulating()) return;
+        if(isCellSpace() || main.handlerTick.pause || main.handlerClick.rightPressed || main.isSimulating()) return;
         
-        if(validateClickAddAtom(HandlerPlayers.getPlayer())){
+        if(validateClickAddAtom(main.handlerPlayers.getPlayer())){
             cellRightPressed = this;
-            HandlerClick.rightPressed = true;
+            main.handlerClick.rightPressed = true;
         }
     }
 
@@ -569,7 +569,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     }
     
     private void tickCheckFocus(){
-        if(HandlerTick.cursorLocation != null && getClickableBounds().contains(HandlerTick.cursorLocation)){
+        if(main.handlerTick.cursorLocation != null && getClickableBounds().contains(main.handlerTick.cursorLocation)){
             if(!cellHideHint && cellLeftPressed != null){
                 if(cellLeftPressed != this && switch(cellLeftPressed.getCellPart()){
                     case cannon, moveable -> true;
@@ -622,7 +622,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     private double angle = (double)MethodsNumber.getRandomNumber(0, 359);
     
     private void tickAngle(){
-        if(this.focused && this.getManagerAtoms().checkAtoms(HandlerPlayers.getPlayer())){
+        if(this.focused && this.getManagerAtoms().checkAtoms(main.handlerPlayers.getPlayer())){
             angle += (getExplodeReady() && !simulateAdd) ? 1.2 : 0.05;
         }else{
             angle += getExplodeReady() ? 0.4 : 0.05;
@@ -675,7 +675,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     private void drawCoordinate(Graphics2D g){
         if(this.drawXcoord){
             boolean draw = false;
-            for(Cell c : HandlerCell.getArray()) if(c.rx == rx && c.highlightXcoord){
+            for(Cell c : main.handlerCell.getArray()) if(c.rx == rx && c.highlightXcoord){
                 draw = true;
                 break;
             }
@@ -684,7 +684,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         }
         if(this.drawYcoord){
             boolean draw = false;
-            for(Cell c : HandlerCell.getArray()) if(c.ry == ry && c.highlightYcoord){
+            for(Cell c : main.handlerCell.getArray()) if(c.ry == ry && c.highlightYcoord){
                 draw = true;
                 break;
             }
@@ -731,9 +731,9 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         g.setColor(SettingsCell.cellBoxColor);
         if(!main.isSimulating() && !main.isCellHideHint()){
             if(focused){
-                g.setColor(isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor());
+                g.setColor(isInvalidMove() ? SettingsCell.invalidColor : main.handlerPlayers.getPlayerColor());
             }else if(sideFocused == d && sideFocusedCell != null){
-                g.setColor(sideFocusedCell.isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor());
+                g.setColor(sideFocusedCell.isInvalidMove() ? SettingsCell.invalidColor : main.handlerPlayers.getPlayerColor());
             }
         }
     }
@@ -741,7 +741,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 // ...........................................................................................................
     
     private void drawCellBackground(Graphics2D g){
-        if(HandlerPlayers.currentPlayer.hintEnabled){
+        if(main.handlerPlayers.currentPlayer.hintEnabled){
             gFillRect(g, isInvalidMove() ? SettingsCell.cellBackgroundInvalid : SettingsCell.cellBackgroundValid, 0, 0, 0, 0);
         }else{
             gFillRect(g, SettingsCell.cellBackgroundValid, 0, 0, 0, 0);
@@ -864,10 +864,10 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             if(focused){
                 if(cellLeftPressed == null || (cellLeftPressed != null && cellLeftPressed == this) || (cellLeftPressed != null && !cellLeftPressed.isCellPart(TypeCellPart.cannon))){
                     drawCellBorderFocused(g);
-                    drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
+                    drawBorder = isInvalidMove() ? SettingsCell.invalidColor : main.handlerPlayers.getPlayerColor();
                 }else{
                     if(this.isCellPart(TypeCellPart.cannon)){
-                        drawBorder = HandlerPlayers.getPlayerColor();
+                        drawBorder = main.handlerPlayers.getPlayerColor();
                     }else{
                         drawBorder = SettingsCell.invalidColor;
                     }
@@ -899,7 +899,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     public void drawCellBorderFocused(Graphics2D g){
         for(Cell c : getManagerSideCell().getArray()) if(c != null){
-            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
+            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : main.handlerPlayers.getPlayerColor();
         }
     }
     

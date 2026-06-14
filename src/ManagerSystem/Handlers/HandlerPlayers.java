@@ -10,50 +10,49 @@ import java.util.Stack;
 
 public class HandlerPlayers{
 
-    public static Main main;
-    public static Player currentPlayer = Player.Player1;
+    public Player currentPlayer = Player.Player1;
     
 // ===========================================================================================================
     
-    public static int movesPerTurn = 1;
-    private static int playerMoves = 0;
+    public int movesPerTurn = 1;
+    private int playerMoves = 0;
 
-    public static int getPlayerMoves(){
+    public int getPlayerMoves(){
         return playerMoves;
     }
     
 // ===========================================================================================================
     
-    public static boolean checkPlayer(Player player){
+    public boolean checkPlayer(Player player){
         return currentPlayer == player;
     }
     
-    public static Player getPlayer(){
+    public Player getPlayer(){
         return currentPlayer;
     }
     
-    public static Color getPlayerColor(){
+    public Color getPlayerColor(){
         return currentPlayer.color;
     }
     
 // ===========================================================================================================
     
-    private static boolean nextPlayer;
-    private static boolean nextPlayerForced;
+    private boolean nextPlayer;
+    private boolean nextPlayerForced;
     
-    public static void nextPlayer(){
+    public void nextPlayer(){
         nextPlayer = true;
     }
     
-    public static void nextPlayerForced(){
+    public void nextPlayerForced(){
         nextPlayerForced = true;
     }
     
    // --------------------------------------------------------------------------------------------------------
     
-    public static void tick(){
+    public void tick(Main main){
         if((nextPlayer || nextPlayerForced) && !main.isSimulating()){
-            HandlerCell.tickTurn();
+            main.handlerCell.tickTurn();
             
             playerMoves++;
             if(playerMoves >= movesPerTurn || nextPlayerForced){
@@ -68,28 +67,28 @@ public class HandlerPlayers{
 
 // ===========================================================================================================
     
-    public static void Reset(){
+    public void Reset(){
         currentPlayer = Player.Player1;
     }
     
 // State =====================================================================================================
     
-    private static Stack<StatePlayer> playerState = new Stack();
+    private Stack<StatePlayer> playerState = new Stack<>();
     
-    public static void ResetState(){
+    public void ResetState(){
         Player.ResetState();
         playerState.clear();
     }
     
-    public static void SaveStates(){
-        Player.SaveState();
+    public void SaveStates(int undoLimit){
+        Player.SaveState(undoLimit);
         playerState.add(new StatePlayer(currentPlayer, playerMoves));
-        if(playerState.size() > main.undoLimit){
+        if(playerState.size() > undoLimit){
             playerState.remove(0);
         }
     }
     
-    public static void UndoStates(){
+    public void UndoStates(){
         Player.UndoState();
         if(!playerState.isEmpty()){
             StatePlayer sP = playerState.pop();

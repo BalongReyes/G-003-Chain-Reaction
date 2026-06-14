@@ -16,12 +16,15 @@ import javax.swing.JFrame;
 
 public class Window extends JFrame {
 
-    public static Main main;
+    private final Main main;
     public Dimension size;
     
     private Dimension frameSize;
     
-    public Window(Dimension size, int onScreen){
+    public Window(Main main, Dimension size, int onScreen){
+        this.main = main;
+        this.keyListener = new KeyListener(main);
+        this.mouseListener = new MouseListener(main);
         this.size = size;
         initComponents();
         setSize(size);
@@ -85,8 +88,8 @@ public class Window extends JFrame {
         repaint();
     }
     
-    private KeyListener keyListener = new KeyListener();
-    private MouseListener mouseListener = new MouseListener();
+    private KeyListener keyListener;
+    private MouseListener mouseListener;
     
     private void setListeners(){
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher((KeyEvent evt) -> {

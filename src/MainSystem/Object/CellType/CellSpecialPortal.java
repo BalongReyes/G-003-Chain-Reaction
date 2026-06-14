@@ -86,9 +86,9 @@ public class CellSpecialPortal extends Cell{
                 
                 if(!main.isSimulating() && (this.focused || c.focused) && !main.isCellHideHint()){
                     if(this.focused){
-                        g.setColor(!this.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
+                        g.setColor(!this.isInvalidMove() ? main.handlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
                     }else if(c.focused){
-                        g.setColor(!c.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
+                        g.setColor(!c.isInvalidMove() ? main.handlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
                     }
                 }else if(this.specialPortalUnderground[d.index]){
                     g.setColor(this.portalLineUndergroundColor);

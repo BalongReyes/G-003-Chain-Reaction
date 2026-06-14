@@ -38,10 +38,10 @@ public class CellMoveable extends Cell{
     
     public void undoStateMove(StateCell sC){
         Position dp = sC.getLastPosition();
-        Cell tC = HandlerCell.getAllCell(dp.rx, dp.ry);
+        Cell tC = main.handlerCell.getAllCell(dp.rx, dp.ry);
         if(tC != null){
-            HandlerCell.swap(this, tC);
-            HandlerCell.updateCells();
+            main.handlerCell.swap(this, tC);
+            main.handlerCell.updateCells(main);
         }
     }
     
@@ -55,7 +55,7 @@ public class CellMoveable extends Cell{
     public boolean moveCell(boolean rightClicked){
         if((isInvalidMove() || main.isSimulating()) && rightClicked) return false;
         if(rightClicked){
-            main.saveStates();
+            main.saveState();
         }
         
         Cell tC = null;
@@ -63,16 +63,16 @@ public class CellMoveable extends Cell{
         
         switch(moveable){
             case 1 -> {
-                if(HandlerCell.getAllCell(this, IDDirection.D, 1).isCellSpace()){
+                if(main.handlerCell.getAllCell(this, IDDirection.D, 1).isCellSpace()){
                     d = IDDirection.D;
-                }else if(HandlerCell.getAllCell(this, IDDirection.U, 1).isCellSpace()){
+                }else if(main.handlerCell.getAllCell(this, IDDirection.U, 1).isCellSpace()){
                     d = IDDirection.U;
                 }
             }
             case 2 -> {
-                if(HandlerCell.getAllCell(this, IDDirection.L, 1).isCellSpace()){
+                if(main.handlerCell.getAllCell(this, IDDirection.L, 1).isCellSpace()){
                     d = IDDirection.L;
-                }else if(HandlerCell.getAllCell(this, IDDirection.R, 1).isCellSpace()){
+                }else if(main.handlerCell.getAllCell(this, IDDirection.R, 1).isCellSpace()){
                     d = IDDirection.R;
                 }
             }
@@ -85,7 +85,7 @@ public class CellMoveable extends Cell{
         int distance = 0;
         while(tC == null || !tC.getManagerSideCell().haveSide(d)){
             distance++;
-            tC = HandlerCell.getAllCell(this, d, distance);
+            tC = main.handlerCell.getAllCell(this, d, distance);
         }
         if(distance <= 1){
             return false;
@@ -108,7 +108,7 @@ public class CellMoveable extends Cell{
             if(!moving && simulateMove){
                 moveAnimation = 1.0D;
                 moveTick = main.moveBuffer;
-                HandlerCell.removeAllSideCells(this);
+                main.handlerCell.removeAllSideCells(this);
             }
         }
     }
@@ -179,12 +179,12 @@ public class CellMoveable extends Cell{
                 simulateMove = false;
                 moving = false;
                 
-                HandlerCell.swapPosition(this, cellMove, sOriginalPosition, tOriginalPosition);
-                HandlerCell.updateCells();
+                main.handlerCell.swapPosition(this, cellMove, sOriginalPosition, tOriginalPosition);
+                main.handlerCell.updateCells(main);
                 
                 if(moveThenAdd){
-                    confirmAddAtoms(HandlerPlayers.getPlayer(), false);
-                    HandlerPlayers.nextPlayer();
+                    confirmAddAtoms(main.handlerPlayers.getPlayer(), false);
+                    main.handlerPlayers.nextPlayer();
                 }
                 
                 cellMove = null;

@@ -13,7 +13,7 @@ public enum Player{
 
 // ===========================================================================================================
     
-    public static Main main;
+
     
     public Color color;
     public String name = null;
@@ -105,10 +105,10 @@ public enum Player{
         }
     }
     
-    public static void SaveState(){
+    public static void SaveState(int undoLimit){
         for(Player dP : values()){
             dP.playerAtoms.add(new StatePlayerAtoms(dP.atoms));
-            if(dP.playerAtoms.size() > main.undoLimit){
+            if(dP.playerAtoms.size() > undoLimit){
                 dP.playerAtoms.remove(0);
             }
         }

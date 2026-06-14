@@ -19,77 +19,119 @@ import java.util.List;
 
 public class HandlerCell{
 
-    public static Main main;
-    
-    public static ArrayList<Cell> cells = new ArrayList();
+    private final java.util.List<Cell> cells = new ArrayList<>();
+    private Cell[] cellsCache = new Cell[0];
+    private boolean cellsDirty = false;
 
-    public static void add(AbstractObject o){
+    private Cell[][] grid = new Cell[SettingsCell.xCell][SettingsCell.yCell];
+
+    public void updateGridSize() {
+        if (grid == null || grid.length != SettingsCell.xCell || grid[0].length != SettingsCell.yCell) {
+            grid = new Cell[SettingsCell.xCell][SettingsCell.yCell];
+        }
+    }
+
+    public void add(AbstractObject o){
         if(o instanceof Cell c){
             cells.add(c);
+            cellsDirty = true;
+            if (c.rx >= 0 && c.rx < SettingsCell.xCell && c.ry >= 0 && c.ry < SettingsCell.yCell) {
+                grid[c.rx][c.ry] = c;
+            }
         }
         if(o instanceof CellMoveable cm){
             moveableCells.add(cm);
+            moveableCellsDirty = true;
         }
     }
 
-    public static void remove(AbstractObject o){
+    public void remove(AbstractObject o){
         if(o instanceof Cell c){
             cells.remove(c);
+            cellsDirty = true;
+            if (c.rx >= 0 && c.rx < SettingsCell.xCell && c.ry >= 0 && c.ry < SettingsCell.yCell) {
+                if(grid[c.rx][c.ry] == c) grid[c.rx][c.ry] = null;
+            }
         }
         if(o instanceof CellMoveable cm){
             moveableCells.remove(cm);
+            moveableCellsDirty = true;
         }
     }
 
-    public static void swap(Cell sC, Cell tC){
+    public void swap(Cell sC, Cell tC){
         Position sDP = sC.getPosition();
-        
-        sC.setNewPosition(tC.getPosition());
+        Position tDP = tC.getPosition();
+        sC.setNewPosition(tDP);
         tC.setNewPosition(sDP);
+        
+        if (sDP.rx >= 0 && sDP.rx < SettingsCell.xCell && sDP.ry >= 0 && sDP.ry < SettingsCell.yCell) {
+            grid[sDP.rx][sDP.ry] = tC;
+        }
+        if (tDP.rx >= 0 && tDP.rx < SettingsCell.xCell && tDP.ry >= 0 && tDP.ry < SettingsCell.yCell) {
+            grid[tDP.rx][tDP.ry] = sC;
+        }
     }
     
-    public static void swapPosition(Cell sC, Cell tC, Position sCp, Position tCp){
+    public void swapPosition(Cell sC, Cell tC, Position sCp, Position tCp){
         sC.setNewPosition(tCp);
         tC.setNewPosition(sCp);
+        
+        if (sCp.rx >= 0 && sCp.rx < SettingsCell.xCell && sCp.ry >= 0 && sCp.ry < SettingsCell.yCell) {
+            grid[sCp.rx][sCp.ry] = tC;
+        }
+        if (tCp.rx >= 0 && tCp.rx < SettingsCell.xCell && tCp.ry >= 0 && tCp.ry < SettingsCell.yCell) {
+            grid[tCp.rx][tCp.ry] = sC;
+        }
     }
     
-    public static boolean check(AbstractObject o){
+    public boolean check(AbstractObject o){
         return o instanceof Cell;
     }
 
-    public static Cell[] getArray(){
-        return cells.toArray(Cell[]::new);
+    public Cell[] getArray(){
+        if(cellsDirty){
+            cellsCache = cells.toArray(Cell[]::new);
+            cellsDirty = false;
+        }
+        return cellsCache;
     }
 
-    public static void Reset(){
-        cells.forEach((c) -> {
+    public void Reset(){
+        for(Cell c : getArray()){
             c.reset();
-        });
+        }
     }
 
 // -----------------------------------------------------------------------------------------------------------
     
-    public static ArrayList<CellMoveable> moveableCells = new ArrayList();
+    private final java.util.List<CellMoveable> moveableCells = new ArrayList<>();
+    private CellMoveable[] moveableCellsCache = new CellMoveable[0];
+    private boolean moveableCellsDirty = false;
     
-    public static CellMoveable[] getCellMoveableArray(){
-        return moveableCells.toArray(CellMoveable[]::new);
+    public CellMoveable[] getCellMoveableArray(){
+        if(moveableCellsDirty){
+            moveableCellsCache = moveableCells.toArray(CellMoveable[]::new);
+            moveableCellsDirty = false;
+        }
+        return moveableCellsCache;
     }
     
 // -----------------------------------------------------------------------------------------------------------
     
-    public static void ResetState(){
+    public void ResetState(){
         for(Cell c : getArray()){
             c.resetState();
         }
     }
     
-    public static void SaveState(){
+    public void SaveState(){
         for(Cell c : getArray()){
             c.saveState();
         }
     }
 
-    public static void UndoState(){
+    public void UndoState(){
         for(Cell c : getArray()){
             c.undoState();
         }
@@ -97,7 +139,7 @@ public class HandlerCell{
     
 // -----------------------------------------------------------------------------------------------------------
     
-    public static Cell[] getCellTeleport(int teleportCellPart){
+    public Cell[] getCellTeleport(int teleportCellPart){
         Cell[] output = new Cell[]{null, null};
         int i = 0;
         for(Cell c : getArray()){
@@ -117,7 +159,7 @@ public class HandlerCell{
         }
     }
     
-    public static List<Cell> getCellMirror(int mirrorCellPart) {
+    public List<Cell> getCellMirror(int mirrorCellPart) {
         List<Cell> output = new ArrayList<>();
         for (Cell c : getArray()) {
             if (c instanceof CellMirror cm) {
@@ -131,69 +173,52 @@ public class HandlerCell{
     
 // -----------------------------------------------------------------------------------------------------------
     
-    public static Cell getCell(Cell c, IDDirection d){
+    public Cell getCell(Cell c, IDDirection d){
         return getCell(c, d, 1);
     }
 
-    public static Cell getCell(Cell c, IDDirection d, int distance){
+    public Cell getCell(Cell c, IDDirection d, int distance){
         return switch(d){
-            case U ->
-                getCell(c.rx, c.ry - distance);
-            case D ->
-                getCell(c.rx, c.ry + distance);
-            case L ->
-                getCell(c.rx - distance, c.ry);
-            case R ->
-                getCell(c.rx + distance, c.ry);
-            default ->
-                null;
+            case U -> getCell(c.rx, c.ry - distance);
+            case D -> getCell(c.rx, c.ry + distance);
+            case L -> getCell(c.rx - distance, c.ry);
+            case R -> getCell(c.rx + distance, c.ry);
+            default -> null;
         };
     }
 
-    public static Cell getCell(int rx, int ry){
-        if(rx != -1 && rx != SettingsCell.xCell && ry != -1 && ry != SettingsCell.yCell){
-            for(Cell c : getArray()){
-                if(c.rx == rx && c.ry == ry && !c.isCellSpace()){
-                    return c;
-                }
+    public Cell getCell(int rx, int ry){
+        if(rx >= 0 && rx < SettingsCell.xCell && ry >= 0 && ry < SettingsCell.yCell){
+            Cell c = grid[rx][ry];
+            if (c != null && !c.isCellSpace()) {
+                return c;
             }
         }
-
         return null;
     }
     
 // -----------------------------------------------------------------------------------------------------------
     
-    public static Cell getAllCell(Cell c, IDDirection d, int distance){
+    public Cell getAllCell(Cell c, IDDirection d, int distance){
         return switch(d){
-            case U ->
-                getAllCell(c.rx, c.ry - distance);
-            case D ->
-                getAllCell(c.rx, c.ry + distance);
-            case L ->
-                getAllCell(c.rx - distance, c.ry);
-            case R ->
-                getAllCell(c.rx + distance, c.ry);
-            default ->
-                null;
+            case U -> getAllCell(c.rx, c.ry - distance);
+            case D -> getAllCell(c.rx, c.ry + distance);
+            case L -> getAllCell(c.rx - distance, c.ry);
+            case R -> getAllCell(c.rx + distance, c.ry);
+            default -> null;
         };
     }
 
-    public static Cell getAllCell(int rx, int ry){
-        if(rx != -1 && rx != SettingsCell.xCell && ry != -1 && ry != SettingsCell.yCell){
-            for(Cell c : getArray()){
-                if(c.rx == rx && c.ry == ry){
-                    return c;
-                }
-            }
+    public Cell getAllCell(int rx, int ry){
+        if(rx >= 0 && rx < SettingsCell.xCell && ry >= 0 && ry < SettingsCell.yCell){
+            return grid[rx][ry];
         }
-
         return null;
     }
 
 // -----------------------------------------------------------------------------------------------------------
 
-    public static void removeAllSideCells(Cell c){
+    public void removeAllSideCells(Cell c){
         ManagerSideCell managerSideCell = c.getManagerSideCell();
         Cell[] sideCells = managerSideCell.sideCells;
         for(IDDirection d : IDDirection.values()){
@@ -204,7 +229,7 @@ public class HandlerCell{
         }
     }
     
-    public static void updateCells(){
+    public void updateCells(Main main){
         
         for(Cell sC : getArray()){
             sC.resetManagerSideCell();
@@ -341,18 +366,18 @@ public class HandlerCell{
         resetFocused();
     }
     
-    public static void resetFocused(){
-        cells.forEach((c) -> {
+    public void resetFocused(){
+        for(Cell c : getArray()){
             c.resetFocused();
-        });
+        }
     }
     
 // -----------------------------------------------------------------------------------------------------------
     
-    public static void tickTurn(){
-        cells.forEach((c) -> {
+    public void tickTurn(){
+        for(Cell c : getArray()){
             c.tickTurn();
-        });
+        }
     }
     
 }

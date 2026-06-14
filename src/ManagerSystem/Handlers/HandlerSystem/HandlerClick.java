@@ -8,81 +8,90 @@ import java.util.ArrayList;
 
 public class HandlerClick{
 
-    public static ArrayList<Clickable> clickable = new ArrayList();
+    private final java.util.List<Clickable> clickable = new ArrayList<>();
+    private Clickable[] clickableCache = new Clickable[0];
+    private boolean dirty = false;
 
-    public static void add(AbstractObject o){
+    public void add(AbstractObject o){
         if(o instanceof Clickable c){
             clickable.add(c);
+            dirty = true;
         }
     }
 
-    public static void remove(AbstractObject o){
+    public void remove(AbstractObject o){
         if(o instanceof Clickable c){
             clickable.remove(c);
+            dirty = true;
         }
     }
 
-    public static void set(AbstractObject oldO, AbstractObject newO){
+    public void set(AbstractObject oldO, AbstractObject newO){
         if(oldO instanceof Clickable oldT){
             if(newO instanceof Clickable newT){
                 clickable.set(clickable.indexOf(oldT), newT);
+                dirty = true;
             }
         }
     }
 
-    public static boolean check(AbstractObject o){
+    public boolean check(AbstractObject o){
         return o instanceof Clickable;
     }
 
-    public static Clickable[] getArray(){
-        return clickable.toArray(Clickable[]::new);
+    public Clickable[] getArray(){
+        if(dirty){
+            clickableCache = clickable.toArray(Clickable[]::new);
+            dirty = false;
+        }
+        return clickableCache;
     }
 
-    public static boolean leftPressed = false;
+    public boolean leftPressed = false;
     
-    public static void clickLeftPressed(Point p){
-        clickable.forEach((c) -> {
+    public void clickLeftPressed(Point p){
+        for(Clickable c : getArray()){
             if(c.getClickableBounds().contains(p)){
                 c.clickLeftPressed();
             }
-        });
+        }
     }
 
-    public static void clickLeftReleased(Point p){
-        clickable.forEach((c) -> {
+    public void clickLeftReleased(Point p){
+        for(Clickable c : getArray()){
             if(c.getClickableBounds().contains(p)){
                 c.clickLeftReleased();
             }
-        });
+        }
         leftPressed = false;
         Cell.cellLeftPressed = null;
     }
 
-    public static boolean rightPressed = false;
+    public boolean rightPressed = false;
     
-    public static void clickRightPressed(Point p){
-        clickable.forEach((c) -> {
+    public void clickRightPressed(Point p){
+        for(Clickable c : getArray()){
             if(c.getClickableBounds().contains(p)){
                 c.clickRightPressed();
             }
-        });
+        }
     }
 
-    public static void clickRightReleased(Point p){
-        clickable.forEach((c) -> {
+    public void clickRightReleased(Point p){
+        for(Clickable c : getArray()){
             if(c.getClickableBounds().contains(p)){
                 c.clickRightReleased();
             }
-        });
+        }
         rightPressed = false;
         Cell.cellRightPressed = null;
     }
     
-    public static void clickMiddlePressed(Point p){
-        clickable.forEach((c) -> {
+    public void clickMiddlePressed(Point p){
+        for(Clickable c : getArray()){
             if(c.getClickableBounds().contains(p)){
                 c.clickMiddlePressed();
             }
-        });
+        }
     }
 }

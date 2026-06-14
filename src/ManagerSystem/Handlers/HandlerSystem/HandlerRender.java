@@ -9,73 +9,70 @@ import java.util.ArrayList;
 
 public class HandlerRender{
 
-    public static Main main;
+    private final java.util.List<Renderable> renderable = new ArrayList<>();
+    private Renderable[] renderableCache = new Renderable[0];
+    private boolean dirty = false;
     
-    public static ArrayList<Renderable> renderable = new ArrayList();
-    
-    public static boolean pause = false;
-    public static boolean rendering = false;
+    public boolean pause = false;
+    public boolean rendering = false;
 
-    public static void add(AbstractObject o){
+    public void add(AbstractObject o){
         if(o instanceof Renderable r){
             renderable.add(r);
+            dirty = true;
         }
     }
 
-    public static void remove(AbstractObject o){
+    public void remove(AbstractObject o){
         if(o instanceof Renderable r){
             renderable.remove(r);
+            dirty = true;
         }
     }
 
-    public static void set(AbstractObject oldO, AbstractObject newO){
+    public void set(AbstractObject oldO, AbstractObject newO){
         if(oldO instanceof Renderable oldR){
             if(newO instanceof Renderable newR){
                 renderable.set(renderable.indexOf(oldR), newR);
+                dirty = true;
             }
         }
     }
 
-    public static boolean check(AbstractObject o){
+    public boolean check(AbstractObject o){
         return o instanceof Renderable;
     }
 
-    public static Renderable[] getArray(){
-        return renderable.toArray(Renderable[]::new);
+    public Renderable[] getArray(){
+        if(dirty){
+            renderableCache = renderable.toArray(Renderable[]::new);
+            dirty = false;
+        }
+        return renderableCache;
     }
 
-    public static int showRenderLayer = 0;
+    public int showRenderLayer = 0;
     
-    public static void render(Graphics2D g){
+    public void render(Graphics2D g, Main main){
         if(!pause){
             rendering = true;
             main.preRender(g);
             try{
-                if(showRenderLayer == 0 || showRenderLayer == 1) renderable.forEach((r) -> {
-                    if(r.isRenderReady()){
-                        r.renderLayer1(g);
-                    }
-                });
-                if(showRenderLayer == 0 || showRenderLayer == 2) renderable.forEach((r) -> {
-                    if(r.isRenderReady()){
-                        r.renderLayer2(g);
-                    }
-                });
-                if(showRenderLayer == 0 || showRenderLayer == 3) renderable.forEach((r) -> {
-                    if(r.isRenderReady()){
-                        r.renderLayer3(g);
-                    }
-                });
-                if(showRenderLayer == 0 || showRenderLayer == 4) renderable.forEach((r) -> {
-                    if(r.isRenderReady()){
-                        r.renderLayer4(g);
-                    }
-                });
-                if(showRenderLayer == 0 || showRenderLayer == 5) renderable.forEach((r) -> {
-                    if(r.isRenderReady()){
-                        r.renderLayer5(g);
-                    }
-                });
+                if(showRenderLayer == 0 || showRenderLayer == 1) for(Renderable r : getArray()){
+                    if(r.isRenderReady()) r.renderLayer1(g);
+                }
+                if(showRenderLayer == 0 || showRenderLayer == 2) for(Renderable r : getArray()){
+                    if(r.isRenderReady()) r.renderLayer2(g);
+                }
+                if(showRenderLayer == 0 || showRenderLayer == 3) for(Renderable r : getArray()){
+                    if(r.isRenderReady()) r.renderLayer3(g);
+                }
+                if(showRenderLayer == 0 || showRenderLayer == 4) for(Renderable r : getArray()){
+                    if(r.isRenderReady()) r.renderLayer4(g);
+                }
+                if(showRenderLayer == 0 || showRenderLayer == 5) for(Renderable r : getArray()){
+                    if(r.isRenderReady()) r.renderLayer5(g);
+                }
             }catch(Exception var2){
                 Console.out("\nRender Error:", true);
                 Console.out(var2.getMessage(), true);

@@ -50,7 +50,7 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
             this.angle = 0.0D;
         }
 
-        if(HandlerPlayers.checkPlayer(player)){
+        if(main.handlerPlayers.checkPlayer(player)){
             if(this.radius < 8.0D && this.radiusTick <= 0){
                 this.radius += 0.5D;
                 this.radiusTick = 20;

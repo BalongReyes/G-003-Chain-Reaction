@@ -3,8 +3,7 @@ package MainSystem.Threads;
 import MainSystem.Main.Console;
 import MainSystem.Main.Main;
 import ManagerSystem.Handlers.HandlerPlayers;
-import ManagerSystem.Handlers.HandlerSystem.HandlerRender;
-import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
+
 import ManagerSystem.Listeners.KeyListener;
 import Settings.SettingsSystem;
 import Settings.SettingsWindow;
@@ -15,7 +14,11 @@ import java.awt.image.BufferStrategy;
 
 public class ThreadProcess implements Runnable{
 
-    public static Main main;
+    private final Main main;
+
+    public ThreadProcess(Main main) {
+        this.main = main;
+    }
     
     private static final double SECOND_TO_NANO = 1.0E9D;
     private static final float NINETY_PERCENT = 0.9F;
@@ -87,7 +90,8 @@ public class ThreadProcess implements Runnable{
                 }
 
                 while(lastTick < tick){
-                    HandlerTick.tick();
+                    main.handlerPlayers.tick(main);
+                    main.handlerTick.tick(main);
                     ++lastTick;
                     if(lastTick % SettingsSystem.ticks == 0){
                         fps = renderedFrames;
@@ -99,16 +103,16 @@ public class ThreadProcess implements Runnable{
                 g.fillRect(0, 0, w, h);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHints(rh);
-                HandlerRender.render(g2);
+                main.handlerRender.render(g2, main);
                 main.window.jLabel1.setText("FPS: " + fps +
                     (main.isSimulating() ? "   (Simulating)" : "") + 
                     (main.isSimulating() ? "   (" + main.getSimulatePhase() + ")" : "") + 
                     (main.isCellFocused() ? "   (Focused)" : "") + 
                     (main.isCellHideHint() ? "   (Hide Hint)" : "") + 
-                    (HandlerPlayers.getPlayerMoves() > 0 ? "   (PlayerMoves: " + HandlerPlayers.getPlayerMoves() + ")" : "") +
-                    (KeyListener.shift ? "   (Shift)" : "") + (HandlerTick.pause ? "   (Paused)" : "") +
-                    (SettingsSystem.ticks != 1000 ? "   (Tick: " + SettingsSystem.ticks + ")" : "") +
-                    (HandlerRender.showRenderLayer != 0 ? "   (Showing Layer: " + HandlerRender.showRenderLayer + ")" : "")
+                    (main.handlerPlayers.getPlayerMoves() > 0 ? "   (PlayerMoves: " + main.handlerPlayers.getPlayerMoves() + ")" : "") +
+                    (KeyListener.shift ? "   (Shift)" : "") + (main.handlerTick.pause ? "   (Paused)" : "") +
+                    (main.isSimulating() ? "   (Simulating)" : "") +
+                    (main.handlerRender.showRenderLayer != 0 ? "   (Showing Layer: " + main.handlerRender.showRenderLayer + ")" : "")
                 );
                 bs.show();
                 g.dispose();

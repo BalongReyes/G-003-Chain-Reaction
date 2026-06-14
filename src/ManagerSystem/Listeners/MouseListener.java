@@ -5,7 +5,15 @@ import ManagerSystem.Handlers.HandlerSystem.HandlerClick;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 
+import MainSystem.Main.Main;
+
 public class MouseListener implements java.awt.event.MouseListener{
+
+    private final Main main;
+
+    public MouseListener(Main main) {
+        this.main = main;
+    }
 
     @Override
     public void mouseClicked(MouseEvent e){
@@ -17,9 +25,9 @@ public class MouseListener implements java.awt.event.MouseListener{
         int y = e.getY();
         Point p = new Point(x, y);
         switch(e.getButton()){
-            case 1 -> HandlerClick.clickLeftPressed(p);
-            case 2 -> HandlerClick.clickMiddlePressed(p);
-            case 3 -> HandlerClick.clickRightPressed(p);
+            case 1 -> main.handlerClick.clickLeftPressed(p);
+            case 2 -> main.handlerClick.clickMiddlePressed(p);
+            case 3 -> main.handlerClick.clickRightPressed(p);
         }
     }
 
@@ -29,8 +37,8 @@ public class MouseListener implements java.awt.event.MouseListener{
         int y = e.getY();
         Point p = new Point(x, y);
         switch(e.getButton()){
-            case 1 -> HandlerClick.clickLeftReleased(p);
-            case 3 -> HandlerClick.clickRightReleased(p);
+            case 1 -> main.handlerClick.clickLeftReleased(p);
+            case 3 -> main.handlerClick.clickRightReleased(p);
         }
     }
 

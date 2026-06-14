@@ -47,7 +47,7 @@ public class CellMirror extends Cell {
     }
 
     public void updateMirror() {
-        List<Cell> mirrors = HandlerCell.getCellMirror(getManagerMirror().getMirrorCellPart());
+        List<Cell> mirrors = main.handlerCell.getCellMirror(getManagerMirror().getMirrorCellPart());
         if (mirrors != null) {
             for (Cell c : mirrors) {
                 if (c != this) {
@@ -209,7 +209,7 @@ public class CellMirror extends Cell {
         
         for(Cell c : getManagerMirror().getMirrorCells()){
             if(c.drawBorder != null) continue;
-            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
+            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : main.handlerPlayers.getPlayerColor();
             c.drawCellBorderFocused(g);
         }
     }

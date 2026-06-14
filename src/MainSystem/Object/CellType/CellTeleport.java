@@ -42,7 +42,7 @@ public class CellTeleport extends Cell{
     }
     
     public void updateTeleport(){
-        Cell[] teleports = HandlerCell.getCellTeleport(getManagerTeleport().getTeleportCellPart());
+        Cell[] teleports = main.handlerCell.getCellTeleport(getManagerTeleport().getTeleportCellPart());
         if(teleports != null) for(Cell c : teleports) if(c != this){
             getManagerTeleport().setTeleportCell(c);
         }
@@ -236,7 +236,7 @@ public class CellTeleport extends Cell{
         
         if(isCellPart(TypeCellPart.teleport)){
             Cell c = getManagerTeleport().getTeleportCell();
-            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : HandlerPlayers.getPlayerColor();
+            c.drawBorder = isInvalidMove() ? SettingsCell.invalidColor : main.handlerPlayers.getPlayerColor();
         }
     }
     

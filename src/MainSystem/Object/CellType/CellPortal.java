@@ -38,9 +38,9 @@ public class CellPortal extends Cell{
                     if(main.isCellHideHint()){
                         g.setColor(this.portalLineColor);
                     }else if(this.focused){
-                        g.setColor(!this.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
+                        g.setColor(!this.isInvalidMove() ? main.handlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
                     }else if(c.focused){
-                        g.setColor(!c.isInvalidMove() ? HandlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
+                        g.setColor(!c.isInvalidMove() ? main.handlerPlayers.getPlayerColor() : SettingsCell.invalidColor);
                     }else{
                         g.setColor(this.portalLineColor);
                     }
