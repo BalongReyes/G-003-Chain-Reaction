@@ -90,7 +90,6 @@ public class ThreadProcess implements Runnable{
                 }
 
                 while(lastTick < tick){
-                    main.handlerPlayers.tick(main);
                     main.handlerTick.tick(main);
                     ++lastTick;
                     if(lastTick % SettingsSystem.ticks == 0){

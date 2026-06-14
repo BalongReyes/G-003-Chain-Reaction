@@ -14,6 +14,7 @@ import MainSystem.Object.CellType.CellSpace;
 import MainSystem.Object.CellType.CellSpecial;
 import MainSystem.Object.CellType.CellSpecialPortal;
 import MainSystem.Object.CellType.CellShield;
+import MainSystem.Object.CellType.CellBlackHole;
 
 public enum TypeCellPart{
 
@@ -29,7 +30,8 @@ public enum TypeCellPart{
     shield(),           // 9
     mirror(),           // 10
     cannon(),           // 11
-    cross();            // 12
+    cross(),            // 12
+    blackHole();        // 13
 
 // ===========================================================================================================
     
@@ -80,6 +82,9 @@ public enum TypeCellPart{
             }
             case cross -> {
                 return new CellCross(x, y, rx, ry);
+            }
+            case blackHole -> {
+                return new CellBlackHole(x, y, rx, ry);
             }
         }
         return null;

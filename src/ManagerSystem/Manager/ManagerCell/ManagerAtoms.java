@@ -77,6 +77,9 @@ public class ManagerAtoms{
             case cannon -> {
                 setMaxAtoms(3);
             }
+            case blackHole -> {
+                setMaxAtoms(6);
+            }
             default -> {
                 switch(managerSideCell.countSide()){
                     case 2 -> {

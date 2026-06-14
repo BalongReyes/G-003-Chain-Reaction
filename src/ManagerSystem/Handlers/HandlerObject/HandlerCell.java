@@ -313,7 +313,9 @@ public class HandlerCell{
                         sC.getManagerSideCell().setSide(tC, IDDirection.L);
                         tC.getManagerSideCell().setSide(sC, IDDirection.R);
                         ((CellSidePortal)sC).highlightSidePortal[IDDirection.L.index] = true;
-                        ((CellSidePortal)tC).highlightSidePortal[IDDirection.R.index] = true;
+                        if(tC.isCellPart(TypeCellPart.sidePortal)){
+                            ((CellSidePortal)tC).highlightSidePortal[IDDirection.R.index] = true;
+                        }
                     }
 
                     if(sC.rx == SettingsCell.xCell - 1){
@@ -325,7 +327,9 @@ public class HandlerCell{
                         sC.getManagerSideCell().setSide(tC, IDDirection.R);
                         tC.getManagerSideCell().setSide(sC, IDDirection.L);
                         ((CellSidePortal)sC).highlightSidePortal[IDDirection.R.index] = true;
-                        ((CellSidePortal)tC).highlightSidePortal[IDDirection.L.index] = true;
+                        if(tC.isCellPart(TypeCellPart.sidePortal)){
+                            ((CellSidePortal)tC).highlightSidePortal[IDDirection.L.index] = true;
+                        }
                     }
 
                     if(sC.ry == 0){
@@ -337,7 +341,9 @@ public class HandlerCell{
                         sC.getManagerSideCell().setSide(tC, IDDirection.U);
                         tC.getManagerSideCell().setSide(sC, IDDirection.D);
                         ((CellSidePortal)sC).highlightSidePortal[IDDirection.U.index] = true;
-                        ((CellSidePortal)tC).highlightSidePortal[IDDirection.D.index] = true;
+                        if(tC.isCellPart(TypeCellPart.sidePortal)){
+                            ((CellSidePortal)tC).highlightSidePortal[IDDirection.D.index] = true;
+                        }
                     }
 
                     if(sC.ry == SettingsCell.yCell - 1){
@@ -346,7 +352,9 @@ public class HandlerCell{
                             sC.getManagerSideCell().setSide(tC, IDDirection.D);
                             tC.getManagerSideCell().setSide(sC, IDDirection.U);
                             ((CellSidePortal)sC).highlightSidePortal[IDDirection.D.index] = true;
-                            ((CellSidePortal)tC).highlightSidePortal[IDDirection.U.index] = true;
+                            if(tC.isCellPart(TypeCellPart.sidePortal)){
+                                ((CellSidePortal)tC).highlightSidePortal[IDDirection.U.index] = true;
+                            }
                         }
                     }
                 }

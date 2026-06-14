@@ -147,6 +147,23 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                     }
                 }
             }}
+            default -> {
+                if(getManagerAtoms().atomsSize() < getManagerAtoms().getMaxAtoms() - 1){
+                    getManagerAtoms().add(player);
+                }else if(getManagerAtoms().atomsSize() == getManagerAtoms().getMaxAtoms() - 1){
+                    if(explodeAdd){
+                        if(getManagerAtoms().checkAtoms(player)){
+                            getManagerAtoms().replaceAllThenAdd(player);
+                        }else{
+                            getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                        }
+                    }else{
+                        if(getManagerAtoms().checkAtoms(player)){
+                            getManagerAtoms().replaceAllThenAdd(player);
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -212,6 +229,9 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                                 }
                             }
                         }
+                    }
+                    default -> {
+                        valid = true;
                     }
                 }
             }
