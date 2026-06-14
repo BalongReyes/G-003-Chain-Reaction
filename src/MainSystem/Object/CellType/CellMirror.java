@@ -11,7 +11,9 @@ import Settings.SettingsCell;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.util.List;
+import javax.swing.ImageIcon;
 
 public class CellMirror extends Cell {
 
@@ -174,6 +176,21 @@ public class CellMirror extends Cell {
         }
         
         g.setStroke(new BasicStroke(1.0F));
+    }
+    
+// Layer 4 ---------------------------------------------------------------------------------------------------
+    
+    @Override
+    public void renderLayer4(Graphics2D g){
+        super.renderLayer4(g);
+        if(isCellSpace()) return;
+        drawDesignIcon(g);
+    }
+    
+    public Image ImageMirror = new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/DataSystem/Pictures/Mirror.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)).getImage();
+    
+    private void drawDesignIcon(Graphics2D g){
+        drawImage(g, ImageMirror, SettingsCell.getCellIconAlpha(focused));
     }
     
 // Layer 5 ---------------------------------------------------------------------------------------------------

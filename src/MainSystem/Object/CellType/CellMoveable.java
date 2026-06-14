@@ -7,11 +7,14 @@ import DataSystem.State.StateCell;
 import DataSystem.Type.TypeCellPart;
 import static MainSystem.Abstract.AbstractObject.main;
 import MainSystem.Object.Cell;
+import ManagerSystem.CustomGraphics;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
-import java.awt.BasicStroke;
+import Settings.SettingsCell;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import javax.swing.ImageIcon;
 
 public class CellMoveable extends Cell{
 
@@ -255,31 +258,49 @@ public class CellMoveable extends Cell{
     
 // ...........................................................................................................
     
+    public Image ImageMoveH = new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/DataSystem/Pictures/MoveH.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)).getImage();
+    public Image ImageMoveV = new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/DataSystem/Pictures/MoveV.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)).getImage();
+    
     public void drawMoveableDesign(Graphics2D g){
-        g.setStroke(new BasicStroke(2.0F));
+        Color overlayColor = Color.white;
+        
         if(this.focused){
             if(isInvalidMove() || this.futureMove){
+                overlayColor = Color.red;
                 g.setColor(Color.red);
             }else{
+                overlayColor = Color.white;
                 g.setColor(Color.lightGray);
             }
         }else{
             if(this.futureMove){
+                overlayColor = Color.red;
                 g.setColor(Color.red);
             }else{
+                overlayColor = Color.white;
                 g.setColor(Color.gray);
             }
         }
         
-        g.drawLine(getX(12), getY(12), getX(12), getY(14));
-        g.drawLine(getXW(-12), getY(12), getXW(-12), getY(14));
-        g.drawLine(getX(12), getYH(-12), getX(12), getYH(-14));
-        g.drawLine(getXW(-12), getYH(-12), getXW(-12), getYH(-14));
-        g.drawLine(getX(12), getYH(-12), getX(14), getYH(-12));
-        g.drawLine(getX(12), getY(12), getX(14), getY(12));
-        g.drawLine(getXW(-12), getY(12), getXW(-14), getY(12));
-        g.drawLine(getXW(-12), getYH(-12), getXW(-14), getYH(-12));
-        g.setStroke(new BasicStroke(1.0F));
+        switch(moveable){
+            case 1 -> {
+                drawImage(g, CustomGraphics.OverlayColor(g, overlayColor, ImageMoveV), SettingsCell.getCellIconAlpha(focused));
+            }
+            case 2 -> {
+                drawImage(g, CustomGraphics.OverlayColor(g, overlayColor, ImageMoveH), SettingsCell.getCellIconAlpha(focused));
+            }
+        }
+        
+//        g.setStroke(new BasicStroke(2.0F));
+//        g.drawLine(getX(12), getY(12), getX(12), getY(14));
+//        g.drawLine(getXW(-12), getY(12), getXW(-12), getY(14));
+//        g.drawLine(getX(12), getYH(-12), getX(12), getYH(-14));
+//        g.drawLine(getXW(-12), getYH(-12), getXW(-12), getYH(-14));
+//        g.drawLine(getX(12), getYH(-12), getX(14), getYH(-12));
+//        g.drawLine(getX(12), getY(12), getX(14), getY(12));
+//        g.drawLine(getXW(-12), getY(12), getXW(-14), getY(12));
+//        g.drawLine(getXW(-12), getYH(-12), getXW(-14), getYH(-12));
+//        g.setStroke(new BasicStroke(1.0F));
     }
     
 // Layer 5 ---------------------------------------------------------------------------------------------------

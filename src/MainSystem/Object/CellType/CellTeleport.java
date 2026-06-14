@@ -2,16 +2,19 @@
 package MainSystem.Object.CellType;
 
 import DataSystem.Type.TypeCellPart;
-import static MainSystem.Abstract.AbstractObject.main;
 import MainSystem.Methods.MethodsNumber;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
 import ManagerSystem.Manager.ManagerCell.ManagerTeleport;
 import Settings.SettingsCell;
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import javax.swing.ImageIcon;
 
 public class CellTeleport extends Cell{
 
@@ -61,28 +64,66 @@ public class CellTeleport extends Cell{
     
 // -----------------------------------------------------------------------------------------------------------
     
-    private int animationTick = 0;
+    private int animationTick1 = 0;
+    private int animationTick1Max = 75;
+    private int animationTick1TargetMax = 75;
+    
+    private int animationTick2 = 0;
+    private int animationTick2Max = 100;
+    
+    private int animationTick3 = 0;
+    private int animationTick3Max = 100;
+    
     
     @Override
     protected void tickAnimations(){
         super.tickAnimations();
         
-        animationTick++;
-        int animationTickMax = 100;
+        animationTick1++;
+        animationTick1TargetMax = 75;
         if(focused || partFocused){
-            animationTickMax = 10;
+            animationTick1TargetMax = 3;
+            animationTick1Max = 3;
         }
-        if(animationTick > animationTickMax){
-            animationTick = 0;
-            dashPhase--;
-            if(dashPhase <= 0){
-                dashPhase = 40;
+        
+        animationTick2++;
+        if(animationTick2 > animationTick2Max){
+            if(animationTick1Max < animationTick1TargetMax){
+                animationTick1Max++;
+            }else if(animationTick1Max > animationTick1TargetMax){
+                animationTick1Max--;
             }
+            
+            animationTick2 = 0;
+        }
+        
+        if(animationTick1 > animationTick1Max){
+            rotate += 2;
+            if(rotate >= 360){
+                rotate = 0;
+            }
+            
+//            dashPhase--;
+//            if(dashPhase <= 0){
+//                dashPhase = 40;
+//            }
             
             dashPhase2++;
             if(dashPhase2 >= 26){
                 dashPhase2 = 1;
             }
+            
+            animationTick1 = 0;
+        }
+        
+        animationTick3++;
+        if(animationTick3 > animationTick3Max){
+            dashPhase--;
+            if(dashPhase <= 0){
+                dashPhase = 40;
+            }
+            
+            animationTick3 = 0;
         }
     }
     
@@ -117,38 +158,50 @@ public class CellTeleport extends Cell{
     
 // ...........................................................................................................
     
+    public Image imageTeleport = new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/DataSystem/Pictures/Teleport.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)).getImage();
+    
     private int dashPhase = MethodsNumber.getRandomNumber(1, 40);
     private int dashPhase2 = MethodsNumber.getRandomNumber(1, 26);
     
+    private int rotate = MethodsNumber.getRandomNumber(1, 359);
+    
     private void drawDesign(Graphics2D g){
+        AffineTransform tx = AffineTransform.getRotateInstance(Math.toRadians(rotate), imageTeleport.getWidth(null) / 2, imageTeleport.getHeight(null) / 2);
+        
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, focused || partFocused ? 0.6f : 0.2f));
+        g.translate(getX(), getY());
+        g.drawImage(imageTeleport, tx, null);
+        g.translate(-getX(), -getY());
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+        
         Color dash1;
-        Color dash2;
+//        Color dash2;
         
         if(focused && isInvalidMove()){
             dash1 = Color.red;
-            dash2 = Color.red;
+//            dash2 = Color.red;
         }else if(partFocused && getManagerTeleport().getTeleportCell().isInvalidMove()){
             dash1 = Color.red;
-            dash2 = Color.red;
+//            dash2 = Color.red;
         }else{
             if(focused || partFocused){
                 dash1 = Color.white;
-                dash2 = Color.gray;
+//                dash2 = Color.gray;
             }else{
                 dash1 = Color.gray;
-                dash2 = Color.darkGray;
+//                dash2 = Color.darkGray;
             }
         }
 
         g.setColor(dash1);
         g.setStroke(new BasicStroke(2.0F, 1, 1, 1.0F, new float[]{20.0f}, dashPhase));
-        this.gDrawRect(g, 10, 10, -20, -20);
+        this.gDrawRect(g, 5, 5, -10, -10);
         g.setStroke(new BasicStroke(1.0F));
         
-        g.setColor(dash2);
-        g.setStroke(new BasicStroke(2.0F, 1, 1, 1.0F, new float[]{12.0f}, dashPhase2));
-        this.gDrawRect(g, 14, 14, -28, -28);
-        g.setStroke(new BasicStroke(1.0F));
+//        g.setColor(dash2);
+//        g.setStroke(new BasicStroke(2.0F, 1, 1, 1.0F, new float[]{12.0f}, dashPhase2));
+//        this.gDrawRect(g, 14, 14, -28, -28);
+//        g.setStroke(new BasicStroke(1.0F));
     }
 
 // Layer 3 ---------------------------------------------------------------------------------------------------

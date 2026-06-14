@@ -135,10 +135,11 @@ public class ThreadProcess implements Runnable{
         Console.out("ThreadProcess\tClosing", "\u001b[0;31m");
         this.exit = true;
 
-        while(this.running){
-            try{
-                this.wait(10L);
-            }catch(InterruptedException var2){
+        if (this.threadProcess != null) {
+            try {
+                this.threadProcess.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
 

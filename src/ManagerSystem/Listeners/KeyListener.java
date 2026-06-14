@@ -31,7 +31,7 @@ public class KeyListener extends KeyAdapter{
             }
             case KeyEvent.VK_F3 -> {
                 HandlerRender.showRenderLayer++;
-                if(HandlerRender.showRenderLayer > 5){
+                if(HandlerRender.showRenderLayer > 6){
                     HandlerRender.showRenderLayer = 0;
                 }
             }

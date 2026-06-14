@@ -77,4 +77,12 @@ public class HandlerClick{
         rightPressed = false;
         Cell.cellRightPressed = null;
     }
+    
+    public static void clickMiddlePressed(Point p){
+        clickable.forEach((c) -> {
+            if(c.getClickableBounds().contains(p)){
+                c.clickMiddlePressed();
+            }
+        });
+    }
 }

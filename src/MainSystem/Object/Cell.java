@@ -10,9 +10,6 @@ import DataSystem.Interface.Clickable;
 import DataSystem.Interface.Renderable;
 import DataSystem.Interface.Tickable;
 import DataSystem.Type.TypeCellPart;
-import static DataSystem.Type.TypeCellPart.cannon;
-import static DataSystem.Type.TypeCellPart.moveable;
-import static DataSystem.Type.TypeCellPart.specialPortal;
 import MainSystem.Abstract.AbstractObject;
 import MainSystem.Methods.MethodsNumber;
 import MainSystem.Object.CellType.CellCannon;
@@ -24,9 +21,11 @@ import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
 import ManagerSystem.Manager.ManagerCell.ManagerAtoms;
 import ManagerSystem.Manager.ManagerCell.ManagerSideCell;
 import Settings.SettingsCell;
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -94,66 +93,60 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             if(!explodeAdd) return;
         }
 
-        if(getManagerAtoms().atomsSize() < this.getManagerAtoms().getMaxAtoms()) switch(getManagerAtoms().getMaxAtoms()){
+        if(getManagerAtoms().isMaxAtoms()){
+            setPop(player);
+        }else switch(getManagerAtoms().getMaxAtoms()){
             case 1 -> {
                 getManagerAtoms().add(player);
             }
-            case 2 -> {
-                switch(getManagerAtoms().atomsSize()){
-                    case 0 -> {
+            case 2 -> {switch(getManagerAtoms().atomsSize()){
+                case 0 -> {
+                    getManagerAtoms().add(player);
+                }
+                case 1 -> {
+                    if(explodeAdd && !getManagerAtoms().checkAtoms(player)){
+                        getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                    }else{
                         getManagerAtoms().add(player);
                     }
-                    case 1 -> {
-                        if(explodeAdd && !getManagerAtoms().checkAtoms(player)){
+                }
+            }}
+            case 3 -> {switch(getManagerAtoms().atomsSize()){
+                case 0, 1 -> {
+                    getManagerAtoms().add(player);
+                }
+                case 2 -> {
+                    if(explodeAdd){
+                        if(getManagerAtoms().checkAtoms(player)){
+                            getManagerAtoms().replaceAllThenAdd(player);
+                        }else{
                             getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                        }else{
-                            getManagerAtoms().add(player);
+                        }
+                    }else{
+                        if(getManagerAtoms().checkAtoms(player)){
+                            getManagerAtoms().replaceAllThenAdd(player);
                         }
                     }
                 }
-            }
-            case 3 -> {
-                switch(getManagerAtoms().atomsSize()){
-                    case 0, 1 -> {
-                        getManagerAtoms().add(player);
-                    }
-                    case 2 -> {
-                        if(explodeAdd){
-                            if(getManagerAtoms().checkAtoms(player)){
-                                getManagerAtoms().replaceAllThenAdd(player);
-                            }else{
-                                getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                            }
+            }}
+            case 4 -> {switch(getManagerAtoms().atomsSize()){
+                case 0, 1, 2 -> {
+                    getManagerAtoms().add(player);
+                }
+                case 3 -> {
+                    if(explodeAdd){
+                        if(getManagerAtoms().checkAtoms(player)){
+                            getManagerAtoms().replaceAllThenAdd(player);
                         }else{
-                            if(getManagerAtoms().checkAtoms(player)){
-                                getManagerAtoms().replaceAllThenAdd(player);
-                            }
+                            getManagerAtoms().replaceAllThenAdd(Player.Dead);
+                        }
+                    }else{
+                        if(getManagerAtoms().checkAtoms(player)){
+                            getManagerAtoms().replaceAllThenAdd(player);
                         }
                     }
                 }
-            }
-            case 4 -> {
-                switch(getManagerAtoms().atomsSize()){
-                    case 0, 1, 2 -> {
-                        getManagerAtoms().add(player);
-                    }
-                    case 3 -> {
-                        if(explodeAdd){
-                            if(getManagerAtoms().checkAtoms(player)){
-                                getManagerAtoms().replaceAllThenAdd(player);
-                            }else{
-                                getManagerAtoms().replaceAllThenAdd(Player.Dead);
-                            }
-                        }else{
-                            if(getManagerAtoms().checkAtoms(player)){
-                                getManagerAtoms().replaceAllThenAdd(player);
-                            }
-                        }
-                    }
-                }
-            }
-        }else if(getManagerAtoms().isMaxAtoms()){
-            setPop(player);
+            }}
         }
     }
     
@@ -326,7 +319,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
 // Future atoms ----------------------------------------------------------------------------------------------
     
-    public ArrayList<Player> futureAtoms = new ArrayList();
+    public ArrayList<Player> futureAtoms = new ArrayList<>();
     
     public boolean hasFutureAtoms(){
         return !futureAtoms.isEmpty();
@@ -463,6 +456,13 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         int boundY = this.getY() - (int) Math.floor((double) (main.gapSize / 2));
         return new Rectangle(boundX, boundY, 40 + main.gapSize, 40 + main.gapSize);
     }
+    
+// -----------------------------------------------------------------------------------------------------------
+
+    @Override
+    public void clickMiddlePressed(){
+        getManagerAtoms().add(Player.Dead);
+    }
 
 // </editor-fold>
     
@@ -508,7 +508,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 if(tickAdd > 25){
                     tickAdd = 0;
                     atomsDistance++;
-                    if(atomsDistance == 8){
+                    if(atomsDistance >= 8){
                         simulateAdd = false;
                     }
                 }
@@ -572,8 +572,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         if(HandlerTick.cursorLocation != null && getClickableBounds().contains(HandlerTick.cursorLocation)){
             if(!cellHideHint && cellLeftPressed != null){
                 if(cellLeftPressed != this && switch(cellLeftPressed.getCellPart()){
-                    case cannon -> true;
-                    case moveable -> true;
+                    case cannon, moveable -> true;
                     default -> false;
                 }){
                     setCellHideHint(true);
@@ -703,25 +702,25 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             if(c == null) continue;
             
             if(switch(c.getCellPart()){
-                case portal, specialPortal -> true;
+                case portal, specialPortal, sidePortal -> true;
                 default -> false;
-            } && switch(getCellPart()){
-                case portal, specialPortal -> true;
+            } || switch(getCellPart()){
+                case portal, specialPortal, sidePortal -> true;
                 default -> false;
             }){
                 drawPortalDesignColor(g, d);
                 switch(d){
                     case U -> {
-                        if(this.ry - c.ry >= 2) this.gFillRect(g, 13, -4, -25, -36);
+                        if(this.ry == 0 || this.ry - c.ry >= 2) this.gFillRect(g, 13, -4, -25, -36);
                     }
                     case D -> {
-                        if(c.ry - this.ry >= 2) this.gFillRect(g, 13, 40, -25, -36);
+                        if(this.ry == main.map.mapSize[1] - 1 || c.ry - this.ry >= 2) this.gFillRect(g, 13, 40, -25, -36);
                     }
                     case L -> {
-                        if(this.rx - c.rx >= 2) this.gFillRect(g, -4, 13, -36, -25);
+                        if(this.rx == 0 || this.rx - c.rx >= 2) this.gFillRect(g, -4, 13, -36, -25);
                     }
                     case R -> {
-                        if(c.rx - this.rx >= 2) this.gFillRect(g, 40, 13, -36, -25);
+                        if(this.rx == main.map.mapSize[0] - 1 || c.rx - this.rx >= 2) this.gFillRect(g, 40, 13, -36, -25);
                     }
                 }
             }
@@ -1004,6 +1003,14 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 }
             }
         }
+    }
+    
+// -----------------------------------------------------------------------------------------------------------
+    
+    public void drawImage(Graphics2D g, Image image, float f){
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, f));
+        g.drawImage(image, getX(), getY(), null);
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
     }
     
 // </editor-fold>

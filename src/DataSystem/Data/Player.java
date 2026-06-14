@@ -9,9 +9,7 @@ public enum Player{
     
     Dead(Color.gray),
     Player1(Color.cyan, "Sedian"),
-    Player2(Color.magenta, "Jojo"),
-    Player3(Color.yellow, "Vhon");
-//    Player4(Color.green, "Jadey");
+    Player2(Color.magenta, "Diane");
 
 // ===========================================================================================================
     

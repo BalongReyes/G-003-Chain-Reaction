@@ -161,6 +161,10 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
     }
 
     @Override
+    public void clickMiddlePressed(){
+    }
+
+    @Override
     public Rectangle getClickableBounds(){
         return new Rectangle(this.getX(), this.getY(), 12, 12);
     }

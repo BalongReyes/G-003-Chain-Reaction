@@ -5,13 +5,16 @@ import DataSystem.Data.Player;
 import DataSystem.State.StateShield;
 import DataSystem.Type.TypeCellPart;
 import MainSystem.Object.Cell;
+import ManagerSystem.CustomGraphics;
 import ManagerSystem.Handlers.HandlerPlayers;
 import ManagerSystem.Manager.ManagerCell.ManagerShield;
 import Settings.SettingsCell;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.util.Stack;
+import javax.swing.ImageIcon;
 
 public class CellShield extends Cell{
 
@@ -84,7 +87,7 @@ public class CellShield extends Cell{
         
         tickBlinkShieldDecay++;
         if(blinkShieldDecay){
-            if(tickBlinkShieldDecay > 150){
+            if(tickBlinkShieldDecay > 300){
                 tickBlinkShieldDecay = 0;
                 blinkShieldDecay = false;
             }
@@ -151,30 +154,43 @@ public class CellShield extends Cell{
     
 // ...........................................................................................................
     
+    public Image ImageShield = new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/DataSystem/Pictures/Shield.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)).getImage();
+    
     private void drawShieldDesign(Graphics2D g){
+        Color overlayColor = Color.white;
+        
         Player shield = getManagerShield().getShield();
         if(shield != null){
             if(focused && isInvalidMove()){
+                overlayColor = Color.red;
                 g.setColor(Color.red);
             }else{
                 if(HandlerPlayers.checkPlayer(getManagerShield().getShield()) && !focused){
                     if(getManagerAtoms().isEmptyOrDead()){
                         if(blinkShieldDecay){
+                            overlayColor = Color.red;
                             g.setColor(Color.red);
                         }else{
+                            overlayColor = shield == Player.Dead ? Color.white : shield.color;
                             g.setColor(shield.color);
                         }
                     }else{
+                        overlayColor = shield == Player.Dead ? Color.white : shield.color;
                         g.setColor(shield.color);
                     }
                 }else{
+                    overlayColor = shield == Player.Dead ? Color.white : shield.color;
                     g.setColor(shield.color);
                 }
             }
-            g.setStroke(new BasicStroke(2.0F));
+            
+            if(main.isCellHideHint()) g.setColor(Color.gray);
+            g.setStroke(new BasicStroke(1.5F));
             this.gDrawRect(g, 6, 6, -12, -12);
             g.setStroke(new BasicStroke(1.0F));
         }
+        
+        drawImage(g, CustomGraphics.OverlayColor(g, overlayColor, ImageShield), SettingsCell.getCellIconAlpha(focused));
     }
     
 // Layer 5 ---------------------------------------------------------------------------------------------------

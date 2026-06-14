@@ -3,12 +3,13 @@ package MainSystem.Object.CellType;
 
 import DataSystem.ID.IDDirection;
 import DataSystem.Type.TypeCellPart;
-import static MainSystem.Abstract.AbstractObject.main;
 import MainSystem.Object.Cell;
 import ManagerSystem.Handlers.HandlerPlayers;
 import Settings.SettingsCell;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import javax.swing.ImageIcon;
 
 public class CellCannon extends Cell{
 
@@ -24,7 +25,7 @@ public class CellCannon extends Cell{
     public Cell CannonTarget = null;
     
     public void confirmCannonTarget(Cell tC){
-        if(!getManagerAtoms().isMaxAtoms() || !tC.isCellPart(TypeCellPart.cannon)) return;
+        if(!getManagerAtoms().isMaxAtoms() || getManagerAtoms().isEmptyOrDead() || !tC.isCellPart(TypeCellPart.cannon)) return;
         
         main.saveStates();
         CannonTarget = tC;
@@ -81,7 +82,11 @@ public class CellCannon extends Cell{
     
 // ...........................................................................................................
     
+    public Image ImageCannon = new ImageIcon(new javax.swing.ImageIcon(getClass().getResource("/DataSystem/Pictures/Cannon.png")).getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH)).getImage();
+    
     private void drawDesign(Graphics2D g){
+        drawImage(g, ImageCannon, SettingsCell.getCellIconAlpha(focused));
+        
         if(!main.isSimulating()){
             if(cellLeftPressed != null && cellLeftPressed == this){
                 g.setColor(HandlerPlayers.getPlayerColor());

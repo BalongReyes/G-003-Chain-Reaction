@@ -8,6 +8,7 @@ public interface Clickable{
     void clickLeftReleased();
     void clickRightPressed();
     void clickRightReleased();
+    void clickMiddlePressed();
     Rectangle getClickableBounds();
     
 }

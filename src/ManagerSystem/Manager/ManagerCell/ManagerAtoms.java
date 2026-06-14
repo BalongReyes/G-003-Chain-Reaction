@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class ManagerAtoms{
 
-    private ArrayList<Player> differentAtoms = new ArrayList();
+    private ArrayList<Player> differentAtoms = new ArrayList<>();
     public Cell parent;
     
 // Constructor ===============================================================================================
@@ -27,14 +27,7 @@ public class ManagerAtoms{
     }
     
     public boolean checkAtoms(Player player){
-        try{
-            for(Player a : getArray()){
-                if(a == player) return true;
-            }
-        }catch(Exception e){
-            Console.out("\nError: " + e.getMessage(), true);
-        }
-        return false;
+        return atoms.contains(player);
     }
 
     public Player[] getDifferentAtoms(){
@@ -42,11 +35,10 @@ public class ManagerAtoms{
     }
 
     public Color getColor(int i){
-        try{
+        if(i >= 0 && i < atoms.size()){
             return atoms.get(i).color;
-        }catch(Exception e){
-            return null;
         }
+        return null;
     }
     
 // ===========================================================================================================
@@ -82,6 +74,9 @@ public class ManagerAtoms{
             case mirror -> {
                 setMaxAtoms(4);
             }
+            case cannon -> {
+                setMaxAtoms(3);
+            }
             default -> {
                 switch(managerSideCell.countSide()){
                     case 2 -> {
@@ -114,7 +109,7 @@ public class ManagerAtoms{
     
 // Atoms =====================================================================================================
     
-    private ArrayList<Player> atoms = new ArrayList();
+    private ArrayList<Player> atoms = new ArrayList<>();
     
     public boolean isEmpty(){
         return atoms.isEmpty();

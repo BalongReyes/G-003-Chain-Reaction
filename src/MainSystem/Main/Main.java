@@ -39,7 +39,7 @@ public class Main{
     public int totalSize;
     public Dimension canvasSize;
     
-    public AbstractMap map = new Map15();
+    public AbstractMap map = new Map16();
     
 // Constructor ===============================================================================================
     
@@ -162,6 +162,10 @@ public class Main{
     public String getSimulatePhase(){
         return simulatePhase.name();
     }
+
+    public void setSimulatePhase(Phase simulatePhase){
+        this.simulatePhase = simulatePhase;
+    }
     
     public void tickSimulateReaction(){
         for(Cell c : HandlerCell.getArray()){
@@ -188,7 +192,7 @@ public class Main{
                     if(c.pop){
                         c.setSimulatePop();
                         repeatSimulate = true;
-                        simulatePhase = Phase.AddAtoms;
+                        setSimulatePhase(Phase.AddAtoms);
                     }
                 }
                 if(!repeatSimulate){
@@ -203,7 +207,7 @@ public class Main{
                 for(Cell c : HandlerCell.getArray()){
                     c.processFutureAtoms();
                 }
-                simulatePhase = Phase.MoveMoveable;
+                setSimulatePhase(Phase.MoveMoveable);
             }
             case MoveMoveable -> {
                 // Move moveable
@@ -218,7 +222,7 @@ public class Main{
                         }
                     }
                 }while(repeat);
-                simulatePhase = Phase.MoveRead;
+                setSimulatePhase(Phase.MoveRead);
             }
             case MoveRead -> {
                 // Move ready
@@ -228,7 +232,7 @@ public class Main{
                 for(Cell c : HandlerCell.getArray()){
                     c.processFutureMoveReady();
                 }
-                simulatePhase = Phase.Pop;
+                setSimulatePhase(Phase.Pop);
             }
         }
     }

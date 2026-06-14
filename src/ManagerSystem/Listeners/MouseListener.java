@@ -18,6 +18,7 @@ public class MouseListener implements java.awt.event.MouseListener{
         Point p = new Point(x, y);
         switch(e.getButton()){
             case 1 -> HandlerClick.clickLeftPressed(p);
+            case 2 -> HandlerClick.clickMiddlePressed(p);
             case 3 -> HandlerClick.clickRightPressed(p);
         }
     }
