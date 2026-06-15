@@ -70,8 +70,8 @@ public class CellSpecialPortal extends Cell{
     
     private Color portalLineUndergroundColor = new Color(60, 60, 60);
     
-    public int[] specialPortalDashPhase = new int[]{0, 0, 0, 0};
-    public boolean[] specialPortalUnderground = new boolean[4];
+    public int[] specialPortalDashPhase = new int[8];
+    public boolean[] specialPortalUnderground = new boolean[8];
     
     public void resetSpecialPortalUnderground(){
         Arrays.fill(specialPortalUnderground, false);

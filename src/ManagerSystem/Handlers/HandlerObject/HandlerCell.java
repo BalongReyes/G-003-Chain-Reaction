@@ -183,6 +183,10 @@ public class HandlerCell{
             case D -> getCell(c.rx, c.ry + distance);
             case L -> getCell(c.rx - distance, c.ry);
             case R -> getCell(c.rx + distance, c.ry);
+            case UL -> getCell(c.rx - distance, c.ry - distance);
+            case UR -> getCell(c.rx + distance, c.ry - distance);
+            case DL -> getCell(c.rx - distance, c.ry + distance);
+            case DR -> getCell(c.rx + distance, c.ry + distance);
             default -> null;
         };
     }
@@ -205,6 +209,10 @@ public class HandlerCell{
             case D -> getAllCell(c.rx, c.ry + distance);
             case L -> getAllCell(c.rx - distance, c.ry);
             case R -> getAllCell(c.rx + distance, c.ry);
+            case UL -> getAllCell(c.rx - distance, c.ry - distance);
+            case UR -> getAllCell(c.rx + distance, c.ry - distance);
+            case DL -> getAllCell(c.rx - distance, c.ry + distance);
+            case DR -> getAllCell(c.rx + distance, c.ry + distance);
             default -> null;
         };
     }
@@ -245,6 +253,8 @@ public class HandlerCell{
         
         for(Cell sC : getArray()){
             for(IDDirection d : IDDirection.values()){
+                if (!sC.supportDiagonal() && d.isDiagonal()) continue;
+                
                 Cell tC = getCell(sC, d);
                 if(sC.getCellPart() == TypeCellPart.noEntry){
                     if(((CellNoEntry)sC).getNoEntry() == d){
@@ -257,6 +267,7 @@ public class HandlerCell{
         
         for(Cell sC : getArray()){
             if(sC.isCellPart(TypeCellPart.specialPortal)) for(IDDirection d : IDDirection.values()){
+                if (!sC.supportDiagonal() && d.isDiagonal()) continue;
                 if(sC.getManagerSideCell().haveSide(d)) continue;
                 
                 boolean specialPortalUnderground = false;
@@ -282,6 +293,7 @@ public class HandlerCell{
         
         for(Cell sC : getArray()){
             if(sC.isCellPart(TypeCellPart.portal)) for(IDDirection d : IDDirection.values()){
+                if (!sC.supportDiagonal() && d.isDiagonal()) continue;
                 if(sC.getManagerSideCell().haveSide(d)) continue;
                 
                 for(int distance = 2; distance <= main.map.getMaxMapSize(); ++distance){
@@ -302,6 +314,7 @@ public class HandlerCell{
             if(sC.isCellPart(TypeCellPart.sidePortal) && (sC.rx == 0 || sC.ry == 0 || sC.rx == SettingsCell.xCell - 1 || sC.ry == SettingsCell.yCell - 1)){
                 
                 for(IDDirection d : IDDirection.values()){
+                    if (!sC.supportDiagonal() && d.isDiagonal()) continue;
                     if(sC.getManagerSideCell().haveSide(d)) continue;
                     
                     if(sC.rx == 0){

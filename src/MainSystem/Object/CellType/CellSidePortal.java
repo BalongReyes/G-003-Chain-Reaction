@@ -31,7 +31,7 @@ public class CellSidePortal extends Cell{
     
 // ...........................................................................................................
     
-    public boolean[] highlightSidePortal = new boolean[4];
+    public boolean[] highlightSidePortal = new boolean[8];
     
     public void resetHighlightSidePortal(){
         Arrays.fill(this.highlightSidePortal, false);
@@ -57,6 +57,7 @@ public class CellSidePortal extends Cell{
                     this.gFillRect(g, 30, 14, -36, -36);
                     this.gFillRect(g, 30, 22, -36, -36);
                 }
+                case UL, UR, DL, DR -> {}
             }
         }
     }

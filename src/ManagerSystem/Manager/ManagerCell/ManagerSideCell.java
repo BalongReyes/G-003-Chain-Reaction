@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class ManagerSideCell{
 
     public Cell parent;
-    public Cell[] sideCells = new Cell[]{null, null, null, null};
+    public Cell[] sideCells = new Cell[8];
 
     public ManagerSideCell(Cell parent){
         this.parent = parent;
@@ -53,6 +53,14 @@ public class ManagerSideCell{
             case L ->
                 output = this.parent.rx - c.rx;
             case R ->
+                output = c.rx - this.parent.rx;
+            case UL ->
+                output = this.parent.rx - c.rx; // Assuming distance logic is uniform
+            case UR ->
+                output = c.rx - this.parent.rx;
+            case DL ->
+                output = this.parent.rx - c.rx;
+            case DR ->
                 output = c.rx - this.parent.rx;
             default ->
                 throw new IncompatibleClassChangeError();

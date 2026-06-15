@@ -41,7 +41,7 @@ public class Main {
     public int totalSize;
     public Dimension canvasSize;
 
-    public AbstractMap map = new Map11();
+    public AbstractMap map = new Map16();
 
     public final HandlerRender handlerRender = new HandlerRender();
     public final HandlerTick handlerTick = new HandlerTick();

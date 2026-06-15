@@ -9,7 +9,11 @@ public enum IDDirection{
     U(),
     D(),
     L(),
-    R();
+    R(),
+    UL(),
+    UR(),
+    DL(),
+    DR();
 
     public int index;
     
@@ -32,20 +36,32 @@ public enum IDDirection{
             case 1 -> U;
             case 2 -> R;
             case 3 -> L;
+            case 4 -> DR;
+            case 5 -> DL;
+            case 6 -> UR;
+            case 7 -> UL;
             default -> null;
         };
     }
     
+    public boolean isDiagonal() {
+        return this == UL || this == UR || this == DL || this == DR;
+    }
+    
 // Static Methods ============================================================================================
     
+    public static IDDirection[] getOrthogonals() {
+        return new IDDirection[]{U, D, L, R};
+    }
+
     public static IDDirection getRandom(){
         return values()[MethodsNumber.getRandomNumber(0, 3)];
     }
     
     public static IDDirection[] getRandomArray(){
-        IDDirection randomSides[] = new IDDirection[]{null, null, null, null};
+        IDDirection randomSides[] = new IDDirection[]{null, null, null, null, null, null, null, null};
         
-        int[] n = {0, 1, 2, 3};
+        int[] n = {0, 1, 2, 3, 4, 5, 6, 7};
         Random r = new Random();
         for(int i : n){
             int rndI = r.nextInt(n.length);
@@ -53,7 +69,7 @@ public enum IDDirection{
             n[rndI] = n[i];
             n[i] = temp;
         }
-        for(int i = 0; i < 4; i++){
+        for(int i = 0; i < n.length; i++){
             randomSides[i] = IDDirection.getValue(n[i]);
         }
         return randomSides;

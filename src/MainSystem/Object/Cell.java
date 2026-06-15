@@ -260,6 +260,10 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         return this.cellPart == TypeCellPart.space;
     }
     
+    public boolean supportDiagonal() {
+        return false;
+    }
+    
 // ManagerAtoms ----------------------------------------------------------------------------------------------
     
     private ManagerAtoms managerAtoms;
