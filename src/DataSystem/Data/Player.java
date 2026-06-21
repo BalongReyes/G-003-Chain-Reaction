@@ -7,38 +7,38 @@ import java.util.Stack;
 
 public enum Player {
 
-    Dead(Color.gray, false),
-    Player1(Color.GREEN, "Bot 1", true),
-    Player2(Color.MAGENTA, "Bot 2", true),
-    Player3(Color.ORANGE, "Bot 3", true),
-    Player4(Color.PINK, "Bot 4", true),
-    Player5(Color.BLUE, "Bot 5", true),
-    Player6(Color.CYAN, "Bot 6", true),
-    Player7(Color.WHITE, "Bot 7", true);
+    // BotType controls which AI implementation is used for this player.
+    // Change a player's BotType here to switch its logic without touching any other
+    // file.
+    Dead(Color.gray, false, BotType.NONE),
+    Player1(Color.GREEN, "Gemini", true, BotType.GEMINI),
+    Player2(Color.MAGENTA, "Claude", true, BotType.CLAUDE);
 
     // ===========================================================================================================
 
     public Color color;
     public String name = null;
     public boolean isBot = false;
+    public BotType botType = BotType.NONE;
 
     public boolean hintEnabled = false;
 
     // Constructor
     // ===============================================================================================
 
-    private Player(Color color, String name, boolean isBot) {
+    private Player(Color color, String name, boolean isBot, BotType botType) {
         this.color = color;
         this.name = name;
         this.isBot = isBot;
+        this.botType = botType;
 
         if (color == Color.red) {
             throw new RuntimeException("Red is not a valid player color");
         }
     }
 
-    private Player(Color color, boolean isBot) {
-        this(color, null, isBot);
+    private Player(Color color, boolean isBot, BotType botType) {
+        this(color, null, isBot, botType);
     }
 
     // Main Methods

@@ -17,8 +17,8 @@ import MainSystem.Object.CellType.CellMoveable;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
 import ManagerSystem.Handlers.HandlerSystem.HandlerClick;
-import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
-import ManagerSystem.Handlers.BotLogic;
+import ManagerSystem.Handlers.HandlerTick;
+import ManagerSystem.Handlers.BotLogicGemini;
 import ManagerSystem.Manager.ManagerCell.ManagerAtoms;
 import ManagerSystem.Manager.ManagerCell.ManagerSideCell;
 import Settings.SettingsCell;
@@ -693,8 +693,8 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 
     
     protected void drawBotMoveIndicator(Graphics2D g) {
-        if (BotLogic.lastBotMove == this && BotLogic.lastBotPlayer != null && !main.isSimulating()) {
-            g.setColor(BotLogic.lastBotPlayer.color);
+        if (BotLogicGemini.lastBotMove == this && BotLogicGemini.lastBotPlayer != null && !main.isSimulating()) {
+            g.setColor(BotLogicGemini.lastBotPlayer.color);
             g.setStroke(new java.awt.BasicStroke(2.0F, java.awt.BasicStroke.CAP_BUTT, java.awt.BasicStroke.JOIN_BEVEL, 0, new float[]{4}, 0));
             this.gDrawRect(g, 1, 1, -2, -2);
             g.setStroke(new java.awt.BasicStroke(1.0F));
@@ -719,8 +719,8 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             
             if (draw) {
                 g.setColor(Color.white);
-            } else if (ManagerSystem.Handlers.BotLogic.lastBotMove != null && ManagerSystem.Handlers.BotLogic.lastBotMove.rx == this.rx && !main.isSimulating() && ManagerSystem.Handlers.BotLogic.lastBotPlayer != null) {
-                g.setColor(ManagerSystem.Handlers.BotLogic.lastBotPlayer.color);
+            } else if (ManagerSystem.Handlers.BotLogicGemini.lastBotMove != null && ManagerSystem.Handlers.BotLogicGemini.lastBotMove.rx == this.rx && !main.isSimulating() && ManagerSystem.Handlers.BotLogicGemini.lastBotPlayer != null) {
+                g.setColor(ManagerSystem.Handlers.BotLogicGemini.lastBotPlayer.color);
             } else {
                 g.setColor(this.coordinateDefaultColor);
             }
@@ -736,8 +736,8 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
             
             if (draw) {
                 g.setColor(Color.white);
-            } else if (ManagerSystem.Handlers.BotLogic.lastBotMove != null && ManagerSystem.Handlers.BotLogic.lastBotMove.ry == this.ry && !main.isSimulating() && ManagerSystem.Handlers.BotLogic.lastBotPlayer != null) {
-                g.setColor(ManagerSystem.Handlers.BotLogic.lastBotPlayer.color);
+            } else if (ManagerSystem.Handlers.BotLogicGemini.lastBotMove != null && ManagerSystem.Handlers.BotLogicGemini.lastBotMove.ry == this.ry && !main.isSimulating() && ManagerSystem.Handlers.BotLogicGemini.lastBotPlayer != null) {
+                g.setColor(ManagerSystem.Handlers.BotLogicGemini.lastBotPlayer.color);
             } else {
                 g.setColor(this.coordinateDefaultColor);
             }

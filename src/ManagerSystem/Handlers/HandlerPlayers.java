@@ -73,9 +73,19 @@ public class HandlerPlayers{
                     botTickDelay = 0;
                     isBotCalculating = true;
                     
+                    final Player botPlayer = currentPlayer;
                     new Thread(() -> {
                         try {
-                            MainSystem.Object.Cell bestCell = BotLogic.calculateBestMove(currentPlayer, main);
+                            MainSystem.Object.Cell bestCell;
+                            switch (botPlayer.botType) {
+                                case CLAUDE:
+                                    bestCell = BotLogicClaude.calculateBestMove(botPlayer, main);
+                                    break;
+                                case GEMINI:
+                                default:
+                                    bestCell = BotLogicGemini.calculateBestMove(botPlayer, main);
+                                    break;
+                            }
                             botMoveResult = bestCell;
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -89,8 +99,11 @@ public class HandlerPlayers{
                 isBotCalculating = false;
                 botFinishedCalculating = false;
                 if(botMoveResult != null){
-                    BotLogic.lastBotMove = botMoveResult;
-                    BotLogic.lastBotPlayer = currentPlayer;
+                    // Keep both classes' indicators in sync for the rendering system
+                    BotLogicGemini.lastBotMove        = botMoveResult;
+                    BotLogicGemini.lastBotPlayer      = currentPlayer;
+                    BotLogicClaude.lastBotMove   = botMoveResult;
+                    BotLogicClaude.lastBotPlayer = currentPlayer;
                     botMoveResult.clickLeftConfirmed();
                 }else{
                     nextPlayerForced();
