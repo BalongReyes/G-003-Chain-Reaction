@@ -19,8 +19,14 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
     public Player player;
     public String name;
     private double angle = 0.0D;
-    private double radius = 0.0D;
-    private int radiusTick = 0;
+    private double currentRadius = 0.0D;
+    private double currentLeaderOffset = 0.0D;
+    private double[] currentSize = new double[]{12.0, 0.0, 0.0, 0.0};
+    private boolean initialized = false;
+
+    private double targetRadius = 0.0D;
+    private double targetLeaderOffset = 0.0D;
+    private double[] targetSize = new double[4];
     
     private boolean leftPressed = false;
     private boolean rightPressed = false;
@@ -39,27 +45,73 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
     public void reset(){
     }
 
+    private boolean hasMostAtoms() {
+        if (this.player.atoms <= 0) return false;
+        for (Player p : Player.values()) {
+            if (p != Player.Dead && p != this.player) {
+                if (p.atoms >= this.player.atoms) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void updateTargets() {
+        if (main.handlerPlayers.checkPlayer(player)) {
+            // State 1: Active Turn (4 atoms orbiting)
+            targetRadius = 10.0D;
+            targetLeaderOffset = 0.0D;
+            targetSize[0] = 12.0D;
+            targetSize[1] = 12.0D;
+            targetSize[2] = 12.0D;
+            targetSize[3] = 12.0D;
+        } else {
+            // Inactive
+            if (hasMostAtoms()) {
+                // State 2: Inactive Turn, Leading (2 atoms)
+                targetRadius = 0.0D;
+                targetLeaderOffset = 6.0D;
+                targetSize[0] = 12.0D;
+                targetSize[1] = 12.0D;
+                targetSize[2] = 0.0D;
+                targetSize[3] = 0.0D;
+            } else {
+                // State 3: Inactive Turn, Normal (1 atom)
+                targetRadius = 0.0D;
+                targetLeaderOffset = 0.0D;
+                targetSize[0] = 12.0D;
+                targetSize[1] = 0.0D;
+                targetSize[2] = 0.0D;
+                targetSize[3] = 0.0D;
+            }
+        }
+    }
+
     @Override
     public void tick(){
-        if(this.radiusTick > 0){
-            --this.radiusTick;
-        }
-
-        this.angle += this.radius != 0.0D && this.radius != 8.0D ? 0.7D : 0.4D;
+        this.angle += 0.6D;
         if(this.angle >= 360.0D){
-            this.angle = 0.0D;
+            this.angle -= 360.0D;
         }
 
-        if(main.handlerPlayers.checkPlayer(player)){
-            if(this.radius < 8.0D && this.radiusTick <= 0){
-                this.radius += 0.5D;
-                this.radiusTick = 20;
+        if (!initialized) {
+            initialized = true;
+            updateTargets();
+            currentRadius = targetRadius;
+            currentLeaderOffset = targetLeaderOffset;
+            for (int i = 0; i < 4; i++) {
+                currentSize[i] = targetSize[i];
             }
-        }else if(this.radius > 0.0D && this.radiusTick <= 0){
-            this.radius -= 0.5D;
-            this.radiusTick = 40;
+        } else {
+            updateTargets();
+            double lerpFactor = 0.010D; // Smooth transition over ~230ms
+            currentRadius += (targetRadius - currentRadius) * lerpFactor;
+            currentLeaderOffset += (targetLeaderOffset - currentLeaderOffset) * lerpFactor;
+            for (int i = 0; i < 4; i++) {
+                currentSize[i] += (targetSize[i] - currentSize[i]) * lerpFactor;
+            }
         }
-
     }
 
 // Renderable ================================================================================================
@@ -77,15 +129,34 @@ public class PlayerIndicate extends AbstractObject implements Renderable, Tickab
             g.setColor(this.player.color);
         }
 
-        if(this.radius > 0.0D){
-            for(int i = 0; i <= 2; ++i){
-                double radians = (this.angle + (double) (i * 120)) / 180.0D * Math.PI;
-                double x1 = this.radius * Math.cos(-radians);
-                double y1 = this.radius * Math.sin(-radians);
-                g.fill(new Double(this.x + x1, this.y + y1, 12.0D, 12.0D));
+        double[][] positions = new double[4][2];
+
+        // Atom 0: left offset + orbit 0
+        double radians0 = this.angle / 180.0D * Math.PI;
+        positions[0][0] = -currentLeaderOffset + currentRadius * Math.cos(-radians0);
+        positions[0][1] = currentRadius * Math.sin(-radians0);
+
+        // Atom 1: right offset + orbit 90
+        double radians1 = (this.angle + 90.0D) / 180.0D * Math.PI;
+        positions[1][0] = currentLeaderOffset + currentRadius * Math.cos(-radians1);
+        positions[1][1] = currentRadius * Math.sin(-radians1);
+
+        // Atom 2: orbit 180
+        double radians2 = (this.angle + 180.0D) / 180.0D * Math.PI;
+        positions[2][0] = currentRadius * Math.cos(-radians2);
+        positions[2][1] = currentRadius * Math.sin(-radians2);
+
+        // Atom 3: orbit 270
+        double radians3 = (this.angle + 270.0D) / 180.0D * Math.PI;
+        positions[3][0] = currentRadius * Math.cos(-radians3);
+        positions[3][1] = currentRadius * Math.sin(-radians3);
+
+        for (int i = 0; i < 4; i++) {
+            if (currentSize[i] > 0.1D) {
+                double drawX = this.x + positions[i][0] + (12.0D - currentSize[i]) / 2.0D;
+                double drawY = this.y + positions[i][1] + (12.0D - currentSize[i]) / 2.0D;
+                g.fill(new Double(drawX, drawY, currentSize[i], currentSize[i]));
             }
-        }else{
-            g.fill(new Double(this.x, this.y, 12.0D, 12.0D));
         }
 
         g.setColor(Color.white);

@@ -12,7 +12,7 @@ public enum Player {
     // file.
     Dead(Color.gray, false, BotType.NONE),
     Player1(Color.GREEN, "Gemini", true, BotType.GEMINI),
-    Player2(Color.MAGENTA, "Claude", true, BotType.CLAUDE);
+    Player2(Color.CYAN, "Claude", true, BotType.CLAUDE);
 
     // ===========================================================================================================
 

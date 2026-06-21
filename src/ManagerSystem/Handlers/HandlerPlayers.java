@@ -75,6 +75,7 @@ public class HandlerPlayers{
                     
                     final Player botPlayer = currentPlayer;
                     new Thread(() -> {
+                        long calculationStartTime = System.currentTimeMillis();
                         try {
                             MainSystem.Object.Cell bestCell;
                             switch (botPlayer.botType) {
@@ -91,6 +92,15 @@ public class HandlerPlayers{
                             e.printStackTrace();
                             botMoveResult = null;
                         } finally {
+                            long elapsedTime = System.currentTimeMillis() - calculationStartTime;
+                            long remainingDelay = 500 - elapsedTime;
+                            if (remainingDelay > 0) {
+                                try {
+                                    Thread.sleep(remainingDelay);
+                                } catch (InterruptedException ie) {
+                                    Thread.currentThread().interrupt();
+                                }
+                            }
                             botFinishedCalculating = true;
                         }
                     }).start();

@@ -17,7 +17,7 @@ import MainSystem.Object.CellType.CellMoveable;
 import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
 import ManagerSystem.Handlers.HandlerSystem.HandlerClick;
-import ManagerSystem.Handlers.HandlerTick;
+import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
 import ManagerSystem.Handlers.BotLogicGemini;
 import ManagerSystem.Manager.ManagerCell.ManagerAtoms;
 import ManagerSystem.Manager.ManagerCell.ManagerSideCell;
