@@ -51,47 +51,85 @@ public class BotLogic {
     private static Cell calculateMediumMove(Player botPlayer, Main main) {
         return calculateMinimaxMove(botPlayer, main, 2); // Depth 2 for Medium
     }
-
+    
+    // Special exception to abort search when time limit is reached
+    private static class TimeOutException extends Exception {}
+    
     private static Cell calculateMinimaxMove(Player botPlayer, Main main, int maxDepth) {
-        double bestScore = -Double.MAX_VALUE;
-        List<Cell> bestMoves = new ArrayList<>();
-
         VirtualBoard currentBoard = new VirtualBoard(main);
+        
+        List<Cell> absoluteBestMoves = new ArrayList<>();
         Player enemyPlayer = Player.GetNextPlayer(botPlayer, false);
 
-        double alpha = -Double.MAX_VALUE;
-        double beta = Double.MAX_VALUE;
+        long startTime = System.currentTimeMillis();
+        long timeLimit = 500; // 500ms max
 
-        int[] validMoves = currentBoard.getValidMoveIndices(botPlayer);
-
-        for (int moveIdx : validMoves) {
-            Cell c = VirtualBoard.indexToCell[moveIdx];
-            VirtualBoard nextBoard = new VirtualBoard(currentBoard);
-            double scoreDelta = nextBoard.applyMoveIdx(moveIdx, botPlayer);
+        // Iterative Deepening
+        for (int depth = 1; depth <= maxDepth; depth++) { 
+            List<Cell> currentDepthBestMoves = new ArrayList<>();
+            double bestScore = -Double.MAX_VALUE;
+            double alpha = -Double.MAX_VALUE;
+            double beta = Double.MAX_VALUE;
             
-            // NegaMax with Alpha-Beta Pruning
-            double score = scoreDelta - negaMax(nextBoard, enemyPlayer, botPlayer, maxDepth - 1, -beta, -alpha);
-            
-            if (score > bestScore) {
-                bestScore = score;
-                bestMoves.clear();
-                bestMoves.add(c);
-            } else if (score == bestScore) {
-                bestMoves.add(c);
-            }
-            
-            if (score > alpha) {
-                alpha = score;
+            try {
+                int[] validMoves = currentBoard.getValidMoveIndices(botPlayer);
+                
+                for (int moveIdx : validMoves) {
+                    Cell c = VirtualBoard.indexToCell[moveIdx];
+                    VirtualBoard nextBoard = new VirtualBoard(currentBoard);
+                    double scoreDelta = nextBoard.applyMoveIdx(moveIdx, botPlayer);
+                    
+                    // NegaMax with Alpha-Beta Pruning
+                    double score = scoreDelta - negaMax(nextBoard, enemyPlayer, botPlayer, depth - 1, -beta, -alpha, startTime, timeLimit);
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        currentDepthBestMoves.clear();
+                        currentDepthBestMoves.add(c);
+                    } else if (score == bestScore) {
+                        currentDepthBestMoves.add(c);
+                    }
+                    
+                    if (score > alpha) {
+                        alpha = score;
+                    }
+                }
+                
+                // If we completed this depth without timing out, save the results!
+                if (!currentDepthBestMoves.isEmpty()) {
+                    absoluteBestMoves.clear();
+                    absoluteBestMoves.addAll(currentDepthBestMoves);
+                }
+                
+                // If we found an instant win, no need to search deeper
+                if (bestScore >= 1000000) {
+                    break;
+                }
+                
+            } catch (TimeOutException e) {
+                // Time limit reached! Abort current depth and fallback to the previous depth's results
+                break;
             }
         }
 
-        if (!bestMoves.isEmpty()) {
-            return bestMoves.get((int) (Math.random() * bestMoves.size()));
+        if (!absoluteBestMoves.isEmpty()) {
+            return absoluteBestMoves.get((int) (Math.random() * absoluteBestMoves.size()));
+        }
+        
+        // Fallback if absolutely nothing was found
+        int[] fallbackMoves = currentBoard.getValidMoveIndices(botPlayer);
+        if (fallbackMoves.length > 0) {
+            return VirtualBoard.indexToCell[fallbackMoves[0]];
         }
         return null;
     }
 
-    private static double negaMax(VirtualBoard board, Player currentPlayer, Player opponentPlayer, int depth, double alpha, double beta) {
+    private static double negaMax(VirtualBoard board, Player currentPlayer, Player opponentPlayer, int depth, double alpha, double beta, long startTime, long timeLimit) throws TimeOutException {
+        // Fast time check to abort long branches
+        if (System.currentTimeMillis() - startTime > timeLimit) {
+            throw new TimeOutException();
+        }
+        
         if (depth == 0) {
             return 0; // Reached depth limit
         }
@@ -104,7 +142,7 @@ public class BotLogic {
             VirtualBoard nextBoard = new VirtualBoard(board);
             double scoreDelta = nextBoard.applyMoveIdx(moveIdx, currentPlayer);
             
-            double score = scoreDelta - negaMax(nextBoard, opponentPlayer, currentPlayer, depth - 1, -beta, -alpha);
+            double score = scoreDelta - negaMax(nextBoard, opponentPlayer, currentPlayer, depth - 1, -beta, -alpha, startTime, timeLimit);
 
             if (score > maxScore) {
                 maxScore = score;
@@ -329,9 +367,9 @@ public class BotLogic {
             if (isShieldArr != null && isShieldArr[moveIdx]) {
                 if (shieldOwnerArr[moveIdx] == null) {
                     shieldOwnerArr[moveIdx] = p;
-                    // Heavy penalty to discourage using unowned shields as generic stalling tactics,
-                    // since the bot doesn't simulate shield decay over multiple turns.
-                    return score - 30; 
+                    // Extreme penalty to forbid the bot from using unowned shields as generic stalling tactics.
+                    // An unowned shield already absorbs an explosion, so claiming it defensively is a wasted turn.
+                    return score - 100; 
                 } else if (shieldOwnerArr[moveIdx] != p && shieldOwnerArr[moveIdx] != Player.Dead) {
                     shieldDamageArr[moveIdx]++;
                     if (shieldDamageArr[moveIdx] >= SettingsCell.maxShieldHeath) {
@@ -442,8 +480,12 @@ public class BotLogic {
             }
             
             // Strategic Vulnerability Check
+            boolean botAlive = false;
+            boolean enemyAlive = false;
+            
             for (int c = 0; c < activeCellCount; c++) {
                 if (owners[c] == p) {
+                    botAlive = true;
                     for (int adj : explosionTargetsArr[c]) {
                         Player adjOwner = owners[adj];
                         if (adjOwner != null && adjOwner != p && adjOwner != Player.Dead) {
@@ -455,10 +497,17 @@ public class BotLogic {
                             }
                         }
                     }
+                } else if (owners[c] != null && owners[c] != Player.Dead) {
+                    enemyAlive = true;
                 }
             }
+            
+            // Win Condition Detection!
+            // If the bot has cells, but no enemy has any cells left, the bot has achieved total dominance.
+            if (botAlive && !enemyAlive) {
+                score += 100000; // Massive reward for wiping out the enemy!
+            }
 
-            score += Math.random();
             return score;
         }
     }
