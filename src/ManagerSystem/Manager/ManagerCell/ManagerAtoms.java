@@ -130,6 +130,13 @@ public class ManagerAtoms{
         return atoms.toArray(Player[]::new);
     }
     
+    public Player getPlayer(){
+        if(!atoms.isEmpty()){
+            return atoms.get(0);
+        }
+        return null;
+    }
+    
 // ===========================================================================================================
     
     public void replaceAllThenAdd(Player player){

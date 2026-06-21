@@ -128,11 +128,11 @@ public class Main {
 
         if (cellFocused != null) {
             if (!cursorHand) {
-                window.setCursor(12);
+                window.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
                 cursorHand = true;
             }
         } else if (cursorHand) {
-            window.setCursor(0);
+            window.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
             cursorHand = false;
         }
     }

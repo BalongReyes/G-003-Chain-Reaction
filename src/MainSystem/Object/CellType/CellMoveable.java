@@ -63,17 +63,25 @@ public class CellMoveable extends Cell{
         
         switch(moveable){
             case 1 -> {
-                if(main.handlerCell.getAllCell(this, IDDirection.D, 1).isCellSpace()){
+                Cell cellD = main.handlerCell.getAllCell(this, IDDirection.D, 1);
+                if(cellD != null && cellD.isCellSpace()){
                     d = IDDirection.D;
-                }else if(main.handlerCell.getAllCell(this, IDDirection.U, 1).isCellSpace()){
-                    d = IDDirection.U;
+                }else{
+                    Cell cellU = main.handlerCell.getAllCell(this, IDDirection.U, 1);
+                    if(cellU != null && cellU.isCellSpace()){
+                        d = IDDirection.U;
+                    }
                 }
             }
             case 2 -> {
-                if(main.handlerCell.getAllCell(this, IDDirection.L, 1).isCellSpace()){
+                Cell cellL = main.handlerCell.getAllCell(this, IDDirection.L, 1);
+                if(cellL != null && cellL.isCellSpace()){
                     d = IDDirection.L;
-                }else if(main.handlerCell.getAllCell(this, IDDirection.R, 1).isCellSpace()){
-                    d = IDDirection.R;
+                }else{
+                    Cell cellR = main.handlerCell.getAllCell(this, IDDirection.R, 1);
+                    if(cellR != null && cellR.isCellSpace()){
+                        d = IDDirection.R;
+                    }
                 }
             }
         }
@@ -83,14 +91,16 @@ public class CellMoveable extends Cell{
         }
                 
         int distance = 0;
-        while(tC == null || !tC.getManagerSideCell().haveSide(d)){
+        int maxDistance = Math.max(SettingsCell.xCell, SettingsCell.yCell);
+        while((tC == null || !tC.getManagerSideCell().haveSide(d)) && distance < maxDistance){
             distance++;
             tC = main.handlerCell.getAllCell(this, d, distance);
         }
-        if(distance <= 1){
+        if(tC == null || distance <= 1 || tC.reservedForMove){
             return false;
         }
         
+        tC.reservedForMove = true;
         setSimualteMove(tC, d, rightClicked);
         return true;
     }
@@ -178,6 +188,8 @@ public class CellMoveable extends Cell{
                 moveAnimation = 0.0D;
                 simulateMove = false;
                 moving = false;
+                
+                cellMove.reservedForMove = false;
                 
                 main.handlerCell.swapPosition(this, cellMove, sOriginalPosition, tOriginalPosition);
                 main.handlerCell.updateCells(main);

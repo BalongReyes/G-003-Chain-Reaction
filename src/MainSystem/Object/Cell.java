@@ -324,6 +324,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     public boolean futureMove = false;
     public boolean futureMoveReady = false;
+    public boolean reservedForMove = false;
     
     public boolean processFutureMove(){
         boolean repeat = false;
@@ -419,7 +420,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     
     @Override
     public void clickLeftPressed(){
-        if(isCellSpace() || main.handlerTick.pause || main.handlerClick.leftPressed || main.isSimulating()) return;
+        if(isCellSpace() || main.handlerTick.pause || main.handlerClick.leftPressed || main.isSimulating() || main.handlerPlayers.getPlayer().isBot) return;
         
         if(validateClickAddAtom(main.handlerPlayers.getPlayer())){
             cellLeftPressed = this;
@@ -455,7 +456,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
 
     @Override
     public void clickRightPressed(){
-        if(isCellSpace() || main.handlerTick.pause || main.handlerClick.rightPressed || main.isSimulating()) return;
+        if(isCellSpace() || main.handlerTick.pause || main.handlerClick.rightPressed || main.isSimulating() || main.handlerPlayers.getPlayer().isBot) return;
         
         if(validateClickAddAtom(main.handlerPlayers.getPlayer())){
             cellRightPressed = this;

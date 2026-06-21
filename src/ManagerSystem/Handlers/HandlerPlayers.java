@@ -50,6 +50,8 @@ public class HandlerPlayers{
     
    // --------------------------------------------------------------------------------------------------------
     
+    private int botTickDelay = 0;
+    
     public void tick(Main main){
         if((nextPlayer || nextPlayerForced) && !main.isSimulating()){
             main.handlerCell.tickTurn();
@@ -62,6 +64,22 @@ public class HandlerPlayers{
 
             nextPlayer = false;
             nextPlayerForced = false;
+        }
+
+        if(!main.isSimulating() && !nextPlayer && !nextPlayerForced && currentPlayer.isBot){
+            botTickDelay++;
+            if(botTickDelay > 90){
+                botTickDelay = 0;
+                
+                MainSystem.Object.Cell bestCell = BotLogic.calculateBestMove(currentPlayer, main);
+                if(bestCell != null){
+                    bestCell.clickLeftConfirmed();
+                }else{
+                    nextPlayerForced();
+                }
+            }
+        }else{
+            botTickDelay = 0;
         }
     }
 
