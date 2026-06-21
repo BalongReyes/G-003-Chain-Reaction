@@ -67,19 +67,40 @@ public class HandlerPlayers{
         }
 
         if(!main.isSimulating() && !nextPlayer && !nextPlayerForced && currentPlayer.isBot){
-            botTickDelay++;
-            if(botTickDelay > 90){
-                botTickDelay = 0;
-                
-                MainSystem.Object.Cell bestCell = BotLogic.calculateBestMove(currentPlayer, main);
-                if(bestCell != null){
-                    bestCell.clickLeftConfirmed();
+            if (!isBotCalculating) {
+                botTickDelay++;
+                if(botTickDelay > 90){
+                    botTickDelay = 0;
+                    isBotCalculating = true;
+                    
+                    new Thread(() -> {
+                        try {
+                            MainSystem.Object.Cell bestCell = BotLogic.calculateBestMove(currentPlayer, main);
+                            botMoveResult = bestCell;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            botMoveResult = null;
+                        } finally {
+                            botFinishedCalculating = true;
+                        }
+                    }).start();
+                }
+            } else if (botFinishedCalculating) {
+                isBotCalculating = false;
+                botFinishedCalculating = false;
+                if(botMoveResult != null){
+                    BotLogic.lastBotMove = botMoveResult;
+                    BotLogic.lastBotPlayer = currentPlayer;
+                    botMoveResult.clickLeftConfirmed();
                 }else{
                     nextPlayerForced();
                 }
+                botMoveResult = null;
             }
         }else{
             botTickDelay = 0;
+            isBotCalculating = false;
+            botFinishedCalculating = false;
         }
     }
 
@@ -92,6 +113,13 @@ public class HandlerPlayers{
 // State =====================================================================================================
     
     private Stack<StatePlayer> playerState = new Stack<>();
+    
+
+    private boolean isBotCalculating = false;
+    private boolean botFinishedCalculating = false;
+    private MainSystem.Object.Cell botMoveResult = null;
+
+// ...........................................................................................................
     
     public void ResetState(){
         Player.ResetState();

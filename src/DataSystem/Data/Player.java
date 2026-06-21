@@ -8,8 +8,13 @@ import java.util.Stack;
 public enum Player {
 
     Dead(Color.gray, false),
-    Player1(Color.cyan, "Sedian", false),
-    Player2(Color.magenta, "Bot", true);
+    Player1(Color.GREEN, "Bot 1", true),
+    Player2(Color.MAGENTA, "Bot 2", true),
+    Player3(Color.ORANGE, "Bot 3", true),
+    Player4(Color.PINK, "Bot 4", true),
+    Player5(Color.BLUE, "Bot 5", true),
+    Player6(Color.CYAN, "Bot 6", true),
+    Player7(Color.WHITE, "Bot 7", true);
 
     // ===========================================================================================================
 

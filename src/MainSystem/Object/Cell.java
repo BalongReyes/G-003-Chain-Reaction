@@ -18,6 +18,7 @@ import ManagerSystem.Handlers.HandlerObject.HandlerCell;
 import ManagerSystem.Handlers.HandlerPlayers;
 import ManagerSystem.Handlers.HandlerSystem.HandlerClick;
 import ManagerSystem.Handlers.HandlerSystem.HandlerTick;
+import ManagerSystem.Handlers.BotLogic;
 import ManagerSystem.Manager.ManagerCell.ManagerAtoms;
 import ManagerSystem.Manager.ManagerCell.ManagerSideCell;
 import Settings.SettingsCell;
@@ -689,6 +690,17 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         drawDesign(g);
     }
     
+
+    
+    protected void drawBotMoveIndicator(Graphics2D g) {
+        if (BotLogic.lastBotMove == this && BotLogic.lastBotPlayer != null && !main.isSimulating()) {
+            g.setColor(BotLogic.lastBotPlayer.color);
+            g.setStroke(new java.awt.BasicStroke(2.0F, java.awt.BasicStroke.CAP_BUTT, java.awt.BasicStroke.JOIN_BEVEL, 0, new float[]{4}, 0));
+            this.gDrawRect(g, 1, 1, -2, -2);
+            g.setStroke(new java.awt.BasicStroke(1.0F));
+        }
+    }
+
 // ...........................................................................................................
     
     public boolean drawXcoord = false;
@@ -704,7 +716,15 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 draw = true;
                 break;
             }
-            g.setColor(draw ? Color.white : this.coordinateDefaultColor);
+            
+            if (draw) {
+                g.setColor(Color.white);
+            } else if (ManagerSystem.Handlers.BotLogic.lastBotMove != null && ManagerSystem.Handlers.BotLogic.lastBotMove.rx == this.rx && !main.isSimulating() && ManagerSystem.Handlers.BotLogic.lastBotPlayer != null) {
+                g.setColor(ManagerSystem.Handlers.BotLogic.lastBotPlayer.color);
+            } else {
+                g.setColor(this.coordinateDefaultColor);
+            }
+            
             g.drawString(String.valueOf(this.rx + 1), this.getX() + 15, this.getY() - this.ry * main.totalSize - 20);
         }
         if(this.drawYcoord){
@@ -713,7 +733,15 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 draw = true;
                 break;
             }
-            g.setColor(draw ? Color.white : this.coordinateDefaultColor);
+            
+            if (draw) {
+                g.setColor(Color.white);
+            } else if (ManagerSystem.Handlers.BotLogic.lastBotMove != null && ManagerSystem.Handlers.BotLogic.lastBotMove.ry == this.ry && !main.isSimulating() && ManagerSystem.Handlers.BotLogic.lastBotPlayer != null) {
+                g.setColor(ManagerSystem.Handlers.BotLogic.lastBotPlayer.color);
+            } else {
+                g.setColor(this.coordinateDefaultColor);
+            }
+            
             g.drawString(String.valueOf(this.ry + 1), this.getX() + (SettingsCell.xCell - this.rx) * main.totalSize + 10, this.getY() + 23);
         }
     }
@@ -942,6 +970,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         if(isCellSpace()) return;
         drawAtoms(g);
         drawExplode(g);
+        drawBotMoveIndicator(g);
     }
 
 // ...........................................................................................................
