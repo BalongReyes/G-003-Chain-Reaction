@@ -1,18 +1,23 @@
-
 package ManagerSystem.Listeners;
 
 import ManagerSystem.Handlers.HandlerSystem.HandlerClick;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 import MainSystem.Main.Main;
 
-public class MouseListener implements java.awt.event.MouseListener{
+public class MouseListener implements java.awt.event.MouseListener, MouseMotionListener{
 
     private final Main main;
+    private Point mouseLocation = null;
 
     public MouseListener(Main main) {
         this.main = main;
+    }
+
+    public Point getMouseLocation() {
+        return mouseLocation;
     }
 
     @Override
@@ -44,10 +49,22 @@ public class MouseListener implements java.awt.event.MouseListener{
 
     @Override
     public void mouseEntered(MouseEvent e){
+        mouseLocation = e.getPoint();
     }
 
     @Override
     public void mouseExited(MouseEvent e){
+        mouseLocation = null;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        mouseLocation = e.getPoint();
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        mouseLocation = e.getPoint();
     }
 
 }

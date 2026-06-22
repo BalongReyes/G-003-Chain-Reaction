@@ -11,8 +11,16 @@ public enum Player {
     // Change a player's BotType here to switch its logic without touching any other
     // file.
     Dead(Color.gray, false, BotType.NONE),
-    Player1(Color.GREEN, "Gemini", true, BotType.GEMINI),
-    Player2(Color.CYAN, "Claude", true, BotType.CLAUDE);
+    Player1(new Color(255, 85, 0), "Bot 1 Gem", true, BotType.GEMINI),
+    Player2(new Color(255, 170, 0), "Bot 2 Cla", true, BotType.CLAUDE),
+    Player3(new Color(255, 255, 0), "Bot 3 Gem", true, BotType.GEMINI),
+    Player4(new Color(170, 255, 0), "Bot 4 Cla", true, BotType.CLAUDE),
+    Player5(new Color(85, 255, 0), "Bot 5 Gem", true, BotType.GEMINI),
+    Player6(new Color(0, 255, 85), "Bot 6 Cla", true, BotType.CLAUDE),
+    Player7(new Color(0, 255, 255), "Bot 7 Gem", true, BotType.GEMINI),
+    Player8(new Color(0, 85, 255), "Bot 8 Cla", true, BotType.CLAUDE),
+    Player9(new Color(85, 0, 255), "Bot 9 Gem", true, BotType.GEMINI),
+    Player10(new Color(255, 0, 255), "Bot 10 Cla", true, BotType.CLAUDE);
 
     // ===========================================================================================================
 

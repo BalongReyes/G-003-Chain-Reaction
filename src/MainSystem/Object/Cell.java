@@ -510,6 +510,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
                 explodeAnimation = 1.0D;
                 explodeTick = main.explodeBuffer;
                 explodeColor = popPlayer.color;
+                explodeAngle = this.angle;
                 
                 tickPopReady();
                 
@@ -563,6 +564,7 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
     private int explodeTick = 0;
     public double explodeAnimation = 0.0;
     public Color explodeColor;
+    protected double explodeAngle = 0.0D;
     
     private void tickExplode(){
         if(explodeTick > 0){
@@ -1019,42 +1021,42 @@ public class Cell extends AbstractObject implements Tickable, Renderable, Clicka
         }
     }
     
+    protected void drawFlyingAtom(Graphics2D g, Cell target, int index, int N, double angleIncrement, double startRadius, double animation) {
+        if (target == null) return;
+        
+        int tRx = target.rx - this.rx;
+        int tRy = target.ry - this.ry;
+
+        // Starting offset of the atom in the cell before it popped
+        double radians = (this.explodeAngle + (index % N) * angleIncrement) / 180.0D * Math.PI;
+        double startX = startRadius * Math.cos(-radians);
+        double startY = startRadius * Math.sin(-radians);
+
+        // Target position in the adjacent cell
+        double endX = (double)(40 + main.gapSize) * tRx;
+        double endY = (double)(40 + main.gapSize) * tRy;
+
+        // Interpolate position
+        double currentX = startX + (endX - startX) * animation;
+        double currentY = startY + (endY - startY) * animation;
+
+        gEllipse(g, getDoubleX(drawExplodeHalf + currentX), getDoubleY(drawExplodeHalf + currentY), atomSize);
+    }
+    
     protected void drawExplodeSet(Graphics2D g){
         g.setColor(this.explodeColor);
 
-        double animation = 1 - this.explodeAnimation;
-        
+        double animation = 1.0D - this.explodeAnimation;
+        int N = Math.max(1, this.getManagerAtoms().getMaxAtoms());
+        double startRadius = (N == 1) ? 3.0D : 8.0D;
+        double angleIncrement = 360.0D / N;
+
+        int index = 0;
         for(IDDirection d : IDDirection.values()){
             Cell c = getManagerSideCell().getSide(d);
-            if(c == null) continue;
-            
-            int tRx = c.rx - this.rx;
-            int tRy = c.ry - this.ry;
-            int aRx, aRy;
-
-            if(tRx < 0){
-                if(tRy < 0){
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf + aRx), getY(drawExplodeHalf + aRy), atomSize);
-                }else{
-                    tRy *= -1;
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf + aRx), getY(drawExplodeHalf - aRy), atomSize);
-                }
-            }else{
-                tRx *= -1;
-                if(tRy < 0){
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf - aRx), getY(drawExplodeHalf + aRy), atomSize);
-                }else{
-                    tRy *= -1;
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf - aRx), getY(drawExplodeHalf - aRy), atomSize);
-                }
+            if(c != null){
+                drawFlyingAtom(g, c, index, N, angleIncrement, startRadius, animation);
+                index++;
             }
         }
     }

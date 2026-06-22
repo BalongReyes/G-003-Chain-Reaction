@@ -108,10 +108,11 @@ public class Window extends JFrame {
             return false;
         });
         canvas.addMouseListener(mouseListener);
+        canvas.addMouseMotionListener(mouseListener);
     }
     
     public Point getMouseLocation() {
-      return this.canvas.getMousePosition();
+      return this.mouseListener.getMouseLocation();
    }
     
 // Generated =================================================================================================

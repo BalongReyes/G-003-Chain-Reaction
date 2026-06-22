@@ -204,34 +204,7 @@ public class CellMoveable extends Cell{
         }
     }
     
-    @Override
-    protected void drawExplodeSet(Graphics2D g){
-        g.setColor(this.explodeColor);
 
-        double animation = 1 - this.explodeAnimation;
-        int aRD, aR;
-
-        if(this.getManagerSideCell().haveU()){
-            aRD = this.ry - this.getManagerSideCell().getSide(IDDirection.U).ry;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf), getY(drawExplodeHalf - aR), atomSize);
-        }
-        if(this.getManagerSideCell().haveD()){
-            aRD = this.getManagerSideCell().getSide(IDDirection.D).ry - this.ry;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf), getY(drawExplodeHalf + aR), atomSize);
-        }
-        if(this.getManagerSideCell().haveL()){
-            aRD = this.rx - this.getManagerSideCell().getSide(IDDirection.L).rx;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf - aR), getY(drawExplodeHalf), atomSize);
-        }
-        if(this.getManagerSideCell().haveR()){
-            aRD = this.getManagerSideCell().getSide(IDDirection.R).rx - this.rx;
-            aR = (int) (animation * (double)(40 + main.gapSize) * (double)aRD);
-            gEllipse(g, getX(drawExplodeHalf + aR), getY(drawExplodeHalf), atomSize);
-        }
-    }
     
 // Renderable ================================================================================================
 

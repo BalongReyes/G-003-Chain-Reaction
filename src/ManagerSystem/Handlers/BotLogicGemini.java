@@ -10,7 +10,16 @@ import MainSystem.Object.CellType.CellBlackHole;
 import MainSystem.Object.CellType.CellShield;
 import Settings.SettingsCell;
 
-import java.util.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class BotLogicGemini {
 
@@ -45,7 +54,7 @@ public class BotLogicGemini {
     }
 
     private static Cell calculateHardMove(Player botPlayer, Main main) {
-        return runIterativeDeepening(botPlayer, main, 7, 1000L, false); // Depth 7, 1000ms, Disable Aspiration
+        return runIterativeDeepening(botPlayer, main, 7, 1000L, true); // Depth 7, 1000ms, Enable Aspiration
     }
 
     private static Cell calculateMediumMove(Player botPlayer, Main main) {
@@ -91,76 +100,113 @@ public class BotLogicGemini {
                 beta = Double.MAX_VALUE;
             }
 
-            try {
-                int[] validMoves = rootBoard.getValidMoveIndices(botPlayer);
-                
-                // PV / Hash Move Ordering for Root
-                int rootIndex = (int)(rootHash & 131071);
-                TranspositionEntry rootCached = ttable[rootIndex];
-                int rootBestMoveIdx = (rootCached != null && rootCached.hash == rootHash) ? rootCached.bestMoveIdx : -1;
-                if (rootBestMoveIdx != -1) {
-                    for (int i = 0; i < validMoves.length; i++) {
-                        if (validMoves[i] == rootBestMoveIdx) {
-                            for (int j = i; j > 0; j--) {
-                                validMoves[j] = validMoves[j - 1];
-                            }
-                            validMoves[0] = rootBestMoveIdx;
-                            break;
-                        }
-                    }
-                }
-
+            int attempts = 0;
+            boolean searchSuccess = false;
+            
+            while (attempts < 2) {
+                currentDepthBestMoves.clear();
+                bestScore = -Double.MAX_VALUE;
                 int bestRootMoveIdx = -1;
+                
+                try {
+                    int[] validMoves = rootBoard.getValidMoveIndices(botPlayer);
+                    
+                    // PV / Hash Move Ordering for Root
+                    int rootIndex = (int)(rootHash & 131071);
+                    TranspositionEntry rootCached = ttable[rootIndex];
+                    int rootBestMoveIdxTemp = (rootCached != null && rootCached.hash == rootHash) ? rootCached.bestMoveIdx : -1;
+                    if (rootBestMoveIdxTemp != -1) {
+                        for (int i = 0; i < validMoves.length; i++) {
+                            if (validMoves[i] == rootBestMoveIdxTemp) {
+                                for (int j = i; j > 0; j--) {
+                                    validMoves[j] = validMoves[j - 1];
+                                }
+                                validMoves[0] = rootBestMoveIdxTemp;
+                                break;
+                            }
+                        }
+                    }
 
-                for (int moveIdx : validMoves) {
-                    Cell c = rootBoard.indexToCell[moveIdx];
-                    VirtualBoard nextBoard = new VirtualBoard(rootBoard);
-                    double scoreDelta = nextBoard.applyMoveIdx(moveIdx, botPlayer);
-                    
-                    if (scoreDelta >= WIN_SCORE) return c; // Instant win
-                    
-                    // NegaMax with Alpha-Beta Pruning
-                    double score = scoreDelta - negaMax(nextBoard, enemyPlayer, botPlayer, depth - 1, -beta, -alpha, startTime, timeLimitMs, ttable);
-                    
-                    if (score > bestScore) {
-                        bestScore = score;
-                        currentDepthBestMoves.clear();
-                        currentDepthBestMoves.add(c);
-                        bestRootMoveIdx = moveIdx;
-                    } else if (score == bestScore) {
-                        currentDepthBestMoves.add(c);
-                        if (bestRootMoveIdx == -1) {
+                    for (int moveIdx : validMoves) {
+                        Cell c = rootBoard.indexToCell[moveIdx];
+                        VirtualBoard nextBoard = new VirtualBoard(rootBoard);
+                        double scoreDelta = nextBoard.applyMoveIdx(moveIdx, botPlayer);
+                        
+                        if (scoreDelta >= WIN_SCORE) return c; // Instant win
+                        
+                        double score;
+                        if (scoreDelta <= LOSE_SCORE) {
+                            score = LOSE_SCORE;
+                        } else {
+                            // NegaMax with Alpha-Beta Pruning
+                            score = scoreDelta - negaMax(nextBoard, enemyPlayer, botPlayer, depth - 1, -beta, -alpha, startTime, timeLimitMs, ttable);
+                        }
+                        
+                        if (score > bestScore) {
+                            bestScore = score;
+                            currentDepthBestMoves.clear();
+                            currentDepthBestMoves.add(c);
                             bestRootMoveIdx = moveIdx;
+                        } else if (score == bestScore) {
+                            currentDepthBestMoves.add(c);
+                            if (bestRootMoveIdx == -1) {
+                                bestRootMoveIdx = moveIdx;
+                            }
+                        }
+                        
+                        if (score > alpha) alpha = score;
+                        if (useAspiration && alpha >= beta) break; // failed high
+                    }
+                    
+                    if (useAspiration && depth > 2 && attempts == 0) {
+                        if (bestScore <= alpha) {
+                            // Failed low: expand alpha window and re-search
+                            alpha = -Double.MAX_VALUE;
+                            attempts++;
+                            continue;
+                        } else if (bestScore >= beta) {
+                            // Failed high: expand beta window and re-search
+                            beta = Double.MAX_VALUE;
+                            attempts++;
+                            continue;
                         }
                     }
                     
-                    if (score > alpha) alpha = score;
-                    if (useAspiration && alpha >= beta) break; // Aspiration window failed high
-                }
-                
-                // If we completed this depth without timing out, save the results!
-                if (!currentDepthBestMoves.isEmpty() && bestRootMoveIdx != -1) {
-                    bestMoves.clear();
-                    bestMoves.addAll(currentDepthBestMoves);
-                    prevBestScore = bestScore;
+                    searchSuccess = true;
                     
-                    byte ttFlag = TT_EXACT;
-                    int rootIndexStore = (int)(rootHash & 131071);
-                    TranspositionEntry cached = ttable[rootIndexStore];
-                    if (cached == null || depth >= cached.depth) {
-                        ttable[rootIndexStore] = new TranspositionEntry(rootHash, bestScore, depth, ttFlag, bestRootMoveIdx);
+                    // If we completed this depth without timing out, save the results!
+                    if (!currentDepthBestMoves.isEmpty() && bestRootMoveIdx != -1) {
+                        bestMoves.clear();
+                        bestMoves.addAll(currentDepthBestMoves);
+                        prevBestScore = bestScore;
+                        
+                        byte ttFlag = TT_EXACT;
+                        int rootIndexStore = (int)(rootHash & 131071);
+                        TranspositionEntry cached = ttable[rootIndexStore];
+                        if (cached == null || depth >= cached.depth) {
+                            ttable[rootIndexStore] = new TranspositionEntry(rootHash, bestScore, depth, ttFlag, bestRootMoveIdx);
+                        }
                     }
-                }
-                
-                // If we found an instant win, no need to search deeper
-                if (bestScore >= WIN_SCORE) {
+                    break;
+                    
+                } catch (TimeOutException e) {
                     break;
                 }
-                
-            } catch (TimeOutException e) {
-                // Time limit reached! Abort current depth and fallback to the previous depth's results
+            }
+            if (!searchSuccess) {
+                // If search/re-search timed out, stop deepening
                 break;
             }
+            if (bestScore >= WIN_SCORE / 2) {
+                break;
+            }
+        }
+
+        if (prevBestScore <= LOSE_SCORE / 2) {
+            logState(rootBoard, botPlayer, prevBestScore, "FORCED LOSS DETECTED (Score: " + prevBestScore + ")");
+        } else {
+            // Uncomment to log every move:
+            // logState(rootBoard, botPlayer, prevBestScore, "MOVE CHOSEN (Score: " + prevBestScore + ")");
         }
 
         if (!bestMoves.isEmpty()) {
@@ -175,8 +221,8 @@ public class BotLogicGemini {
         return null;
     }
 
-    private static final double WIN_SCORE = 1_000_000;
-    private static final double LOSE_SCORE = -1_000_000;
+    private static final double WIN_SCORE = 1_000_000_000;
+    private static final double LOSE_SCORE = -1_000_000_000;
 
     private static double negaMax(VirtualBoard board, Player currentPlayer, Player opponentPlayer, int depth, double alpha, double beta, long startTime, long timeLimit, TranspositionEntry[] ttable) throws TimeOutException {
         // Fast time check to abort long branches
@@ -247,7 +293,12 @@ public class BotLogicGemini {
                 break;
             }
 
-            double score = scoreDelta - negaMax(nextBoard, opponentPlayer, currentPlayer, depth - 1, -beta, -alpha, startTime, timeLimit, ttable);
+            double score;
+            if (scoreDelta <= LOSE_SCORE) {
+                score = LOSE_SCORE;
+            } else {
+                score = scoreDelta - negaMax(nextBoard, opponentPlayer, currentPlayer, depth - 1, -beta, -alpha, startTime, timeLimit, ttable);
+            }
 
             if (score > maxScore) {
                 maxScore = score;
@@ -308,59 +359,42 @@ public class BotLogicGemini {
             int distToExplode = maxA - ats;
 
             if (owner == myPlayer) {
-                score += ats * 15.0; // Raw atom advantage
-                score += posVal * 8.0; // Territory advantage
+                score += ats * 10.0;   // Friendly Atom advantage (balanced weight)
+                score += posVal * 8.0;  // Territory advantage
 
-                // Aggressive pressure: reward having atoms adjacent to enemy cells, proportional to atom count
+                if (distToExplode <= 1) {
+                    score += posVal * 45.0; // Threat premium for critical cells
+
+                    // Chain reaction potential: reward adjacent critical cells
+                    for (int adj : board.explosionTargetsArr[i]) {
+                        if (board.owners[adj] == myPlayer && board.atoms[adj] >= board.maxAtomsArr[adj] - 1) {
+                            score += 180.0; // Friendly chain reaction
+                        } else if (board.owners[adj] != null && board.owners[adj] != myPlayer && board.owners[adj] != Player.Dead) {
+                            score += 150.0 + (board.atoms[adj] * 40.0); // MASSIVE reward for exploding on enemies
+                        }
+                    }
+                }
+
+                // Defensive caution: penalize if we are adjacent to an enemy critical cell (predicted atom loss if we did not move/react)
                 for (int adj : board.explosionTargetsArr[i]) {
                     Player adjOwner = board.owners[adj];
                     if (adjOwner != null && adjOwner != myPlayer && adjOwner != Player.Dead) {
-                        score += ats * 10.0;
-                    }
-                }
-                
-                if (distToExplode <= 1) {
-                    score += 50.0 + posVal * 5.0; // HUGE premium for critical cells
-
-                    // Chain reaction potential - massive reward for having multiple adjacent criticals
-                    for (int adj : board.explosionTargetsArr[i]) {
-                        if (board.owners[adj] == myPlayer && board.atoms[adj] >= board.maxAtomsArr[adj] - 1) {
-                            score += 40.0; 
-                        } else if (board.owners[adj] != null && board.owners[adj] != myPlayer && board.owners[adj] != Player.Dead) {
-                            // Aggression: rewarding being critical right next to an enemy
-                            score += 30.0 + posVal * 2.0;
+                        int adjDist = board.maxAtomsArr[adj] - board.atoms[adj];
+                        if (adjDist <= 1) {
+                            double vulnPenalty = posVal * 20.0 + ats * 15.0;
+                            if (distToExplode > 1) { // Only penalize heavily if we CANNOT immediately explode back
+                                vulnPenalty += posVal * 25.0;
+                            }
+                            score -= vulnPenalty;
                         }
                     }
                 }
             } else {
-                score -= ats * 15.0;
-                score -= posVal * 8.0;
-
-                // Defensive pressure: penalize enemy having atoms adjacent to our cells
-                for (int adj : board.explosionTargetsArr[i]) {
-                    Player adjOwner = board.owners[adj];
-                    if (adjOwner == myPlayer) {
-                        score -= ats * 10.0;
-                    }
-                }
+                score -= ats * 10.0;   // Enemy Atom advantage (balanced weight)
+                score -= posVal * 8.0;  // Territory advantage
 
                 if (distToExplode <= 1) {
-                    score -= (70.0 + posVal * 6.0);
-                    
-                    for (int adj : board.explosionTargetsArr[i]) {
-                        if (board.owners[adj] != null && board.owners[adj] != myPlayer && board.owners[adj] != Player.Dead 
-                            && board.atoms[adj] >= board.maxAtomsArr[adj] - 1) {
-                            score -= 40.0;
-                        } else if (board.owners[adj] == myPlayer) {
-                            // Vulnerability: enemy is critical next to us
-                            score -= (30.0 + posVal * 2.0);
-                            
-                            // Severe defensive penalty if our adjacent cell is ALSO critical (mutual threat)
-                            if (board.atoms[adj] >= board.maxAtomsArr[adj] - 1) {
-                                score -= (100.0 + posVal * 5.0);
-                            }
-                        }
-                    }
+                    score -= posVal * 45.0; // Enemy threat
                 }
             }
         }
@@ -394,8 +428,18 @@ public class BotLogicGemini {
             Player owner = board.owners[i];
             if (owner != null && owner != botPlayer && owner != Player.Dead) continue;
             
-            // Prefer corners normally
             double val = board.positionWeights[i];
+
+            // Safety check: penalise cells adjacent to enemy-occupied cells in opening
+            for (int adj : board.explosionTargetsArr[i]) {
+                Player adjOwner = board.owners[adj];
+                if (adjOwner != null && adjOwner != botPlayer && adjOwner != Player.Dead) {
+                    val -= 5.0; // adjacent enemy presence is risky
+                    if (board.atoms[adj] >= board.maxAtomsArr[adj] - 1) {
+                        val -= 15.0; // adjacent near-critical enemy is very dangerous
+                    }
+                }
+            }
 
             if (val > bestVal) {
                 bestVal = val;
@@ -403,6 +447,28 @@ public class BotLogicGemini {
             }
         }
         return (bestIdx >= 0) ? board.indexToCell[bestIdx] : null;
+    }
+
+    private static void logState(VirtualBoard board, Player botPlayer, double score, String reason) {
+        try (PrintWriter out = new PrintWriter(new FileWriter("bot_gemini_log.txt", true))) {
+            out.println("=====================================================");
+            out.println("Time: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            out.println("Reason: " + reason);
+            out.println("Bot Player: " + botPlayer);
+            out.println("Evaluation Score: " + score);
+            out.println("Active Cells: " + board.activeCellCount);
+            
+            out.println("--- Board State ---");
+            for (int i = 0; i < board.activeCellCount; i++) {
+                Player owner = board.owners[i];
+                if (owner != null && owner != Player.Dead) {
+                    out.println(String.format("Cell %02d: %-10s | %d/%d atoms", i, owner.name(), board.atoms[i], board.maxAtomsArr[i]));
+                }
+            }
+            out.println("=====================================================\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -756,15 +822,15 @@ public class BotLogicGemini {
                             setCellOwner(adj, popPlayer);
                             
                             if (currentOwner != null && currentOwner != popPlayer && currentOwner != Player.Dead) {
-                                score += 100;           // increased from 50
-                                score += vAtoms * 25;  // increased from 10
+                                score += 300;           // increased for explosions
+                                score += vAtoms * 50;  // increased
                             }
                         } else {
                             atomMaskArr[adj] = (1 << popPlayer.ordinal());
                             setCellOwner(adj, popPlayer);
                             
                             if (currentOwner != null && currentOwner != popPlayer && currentOwner != Player.Dead) {
-                                score += 75; // increased from 30
+                                score += 200; // increased
                             }
                         }
                         
@@ -774,7 +840,7 @@ public class BotLogicGemini {
                             explodeQueue = newQ;
                         }
                         explodeQueue[tail++] = adj;
-                        score += 20; 
+                        score += 40; // increased from 20 
                     } else {
                         atoms[adj]++;
                         atomMaskArr[adj] = (1 << popPlayer.ordinal());

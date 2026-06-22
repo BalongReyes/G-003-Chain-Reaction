@@ -136,40 +136,16 @@ public class CellCannon extends Cell{
     
     @Override
     protected void drawExplodeSet(Graphics2D g){
-        if(CannonTarget == null) super.drawExplodeSet(g);
-        g.setColor(this.explodeColor);
-
-        double animation = 1 - this.explodeAnimation;
-
-        if(CannonTarget != null){
-            int tRx = CannonTarget.rx - this.rx;
-            int tRy = CannonTarget.ry - this.ry;
-            int aRx, aRy;
-
-            if(tRx < 0){
-                if(tRy < 0){
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf + aRx), getY(drawExplodeHalf + aRy), atomSize);
-                }else{
-                    tRy *= -1;
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf + aRx), getY(drawExplodeHalf - aRy), atomSize);
-                }
-            }else{
-                tRx *= -1;
-                if(tRy < 0){
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf - aRx), getY(drawExplodeHalf + aRy), atomSize);
-                }else{
-                    tRy *= -1;
-                    aRx = (int) (animation * (double)(40 + main.gapSize) * (double)tRx);
-                    aRy = (int) (animation * (double)(40 + main.gapSize) * (double)tRy);
-                    gEllipse(g, getX(drawExplodeHalf - aRx), getY(drawExplodeHalf - aRy), atomSize);
-                }
-            }
+        if(CannonTarget == null) {
+            super.drawExplodeSet(g);
+        } else {
+            g.setColor(this.explodeColor);
+            double animation = 1.0D - this.explodeAnimation;
+            int N = Math.max(1, this.getManagerAtoms().getMaxAtoms());
+            double startRadius = (N == 1) ? 3.0D : 8.0D;
+            double angleIncrement = 360.0D / N;
+            
+            drawFlyingAtom(g, CannonTarget, 0, N, angleIncrement, startRadius, animation);
         }
     }
 
